@@ -1,0 +1,47 @@
+package cn.csbe.web.cms.common;
+
+import java.util.UUID;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+/**
+ * 智创基类，封装数据的加解密方法
+ * 
+ * @author e
+ * 
+ */
+public class constantUtils {
+
+	private static final Logger logger = LoggerFactory.getLogger(constantUtils.class);
+	
+	//图片存放位置
+	public  static String THEME_IMG = ConfigUtil.getInstance().getValue("themeImg");
+	public  static String WALL_IMG = ConfigUtil.getInstance().getValue("wallImg");
+	public  static String BUDDHA_IMG = ConfigUtil.getInstance().getValue("buddhaImg");
+	public  static String OFFERINGS_IMG = ConfigUtil.getInstance().getValue("offeringsImg");
+	public  static String NEWS_IMG = ConfigUtil.getInstance().getValue("newImg");
+	public  static String TEMPLE_IMG = ConfigUtil.getInstance().getValue("templeImg");
+	public  static String PRODUCT_IMG = ConfigUtil.getInstance().getValue("productImg");
+	public  static String PRO_TITLE_IMG = ConfigUtil.getInstance().getValue("productTitleImg");
+	public  static String ALERT_IMG = ConfigUtil.getInstance().getValue("alertImg");
+	public  static String NOTICE_IMG = ConfigUtil.getInstance().getValue("noticeImg");
+	
+	public  static String ImgHtmlPath = ConfigUtil.getInstance().getValue("imgHtmlPath");
+	
+	public  static String noticeIcon = ConfigUtil.getInstance().getValue("noticeIcon");
+	public  static String logisticsleftIcon = ConfigUtil.getInstance().getValue("logisticsleftIcon");
+	//物流验证地址
+	public  static String WULIUURL = ConfigUtil.getInstance().getValue("WULIUURL");
+	//推送地址
+	public  static String url = ConfigUtil.getInstance().getValue("url");
+	//付费推送
+	public  static String payUrl = ConfigUtil.getInstance().getValue("payUrl");
+	
+	
+	public static String  get_id(){
+    	return UUID.randomUUID().toString().replace("-", "");
+    	}
+    
+    
+}

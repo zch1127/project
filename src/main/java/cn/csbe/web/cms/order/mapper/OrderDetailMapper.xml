@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.csbe.web.cms.order.mapper.OrderDetailMapper">
+	
+	<!--根据主订单编号去查询子订单信息  -->
+	<select id="selectAllDetailOrderByOrderSn" resultType="cn.csbe.web.cms.order.bean.OrderDetail">
+		select * from ds_order_details where orderSn = #{num}
+	</select>
+	<!--多条件查询  -->
+	<select id="searchOrderByConditions" resultType="cn.csbe.web.cms.order.bean.OrderDetail">
+		select * from ds_order_details where true
+		<if test="orderSn!=''">and orderSn =#{orderSn}</if>
+		<if test="productName !=''">and productName like  CONCAT('%',#{productName},'%')</if>
+	</select>
+	
+	
+	
+</mapper>

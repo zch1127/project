@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.csbe.web.cms.afterSale.mapper.RefundOrderMapper">
+	
+	
+	
+	<!--根据订单状态去查询所有的售后订单  -->
+	<!-- 查询全部 -->
+	<select id="selectRefundOrderByStatus1" resultType="cn.csbe.web.cms.afterSale.bean.RefundOrderDTO">
+		SELECT a.id,a.batchNo,a.refundNo,a.refundReason,a.createDate,a.evidenceImgPath,a.approveStatus,a.modifyDate,a.refundAmount,a.userId,a.status,
+		a.refundType,a.orderMasterId,a.orderSn,b.productNum,b.productPrice,b.productSubtotal,b.productName,c.orderSn,
+		c.receiptDetailedAddress,c.receiptPersonMobile,c.receiptPersonName,d.titleImg imgUrl
+		  from ds_refund_exchange a 
+			left join ds_order_details b 
+				on a.orderDetailsId=b.id LEFT JOIN ds_order_master c 
+			on b.orderSn = c.orderSn 
+				LEFT JOIN ds_product_info d on b.productId=d.id 
+				where a.status=1 and c.status=1   order by a.createDate Desc
+	</select>
+	<!-- 根据售后环节查询 -->
+	<select id="selectRefundOrderByStatus2" resultType="cn.csbe.web.cms.afterSale.bean.RefundOrderDTO">
+		SELECT a.id,a.batchNo,a.refundNo,a.refundReason,a.createDate,a.evidenceImgPath,a.approveStatus,a.modifyDate,a.refundAmount,a.userId,a.status,
+		a.refundType,a.orderMasterId,a.orderSn,b.productNum,b.productPrice,b.productSubtotal,b.productName,c.orderSn,
+		c.receiptDetailedAddress,c.receiptPersonMobile,c.receiptPersonName,d.titleImg imgUrl
+		  from ds_refund_exchange a 
+			left join ds_order_details b 
+				on a.orderDetailsId=b.id LEFT JOIN ds_order_master c 
+			on b.orderSn = c.orderSn 
+				LEFT JOIN ds_product_info d on b.productId=d.id where a.approveStatus=#{approveStatus}
+				and a.status=1 and c.status=1  order by a.createDate Desc
+	</select>
+	
+	<!--多条件查询售后订单  -->
+	<select id="selectRefundOrderByCon" resultType="cn.csbe.web.cms.afterSale.bean.RefundOrderDTO">
+		SELECT a.id,a.batchNo,a.refundNo,a.refundReason,a.createDate,a.evidenceImgPath,a.approveStatus,a.modifyDate,a.refundAmount,a.userId,a.status,
+		a.refundType,a.orderMasterId,a.orderSn,b.productNum,b.productPrice,b.productSubtotal,b.productName,c.orderSn,
+		c.receiptDetailedAddress,c.receiptPersonMobile,c.receiptPersonName,d.titleImg imgUrl
+		  from ds_refund_exchange a 
+			left join ds_order_details b 
+				on a.orderDetailsId=b.id LEFT JOIN ds_order_master c 
+			on b.orderSn = c.orderSn 
+				LEFT JOIN ds_product_info d on b.productId=d.id 
+				where a.status=1 and c.status=1 
+				<if test="refundNo!=null and refundNo!=''">
+					and a.refundNo=#{refundNo}
+				</if>
+				<if test="productName!=null and  productName!=''">
+					and b.productName like CONCAT(CONCAT('%',#{productName}),'%')
+				</if>
+				<if test="receiptPersonMobile!=null and  receiptPersonMobile!=''">
+					and c.receiptPersonMobile=#{receiptPersonMobile}
+				</if>
+				<if test="receiptPersonName!=null and  receiptPersonName!=''">
+					and c.receiptPersonName=#{receiptPersonName}
+				</if>
+				<if test="startDate!=null">
+					and b.createDate>=#{startDate}
+				</if>
+				<if test="endDate!=null">
+					and b.createDate&lt;=#{endDate}
+				</if>
+			order by a.createDate Desc
+	</select>
+	<!-- 查询售后订单详情 -->
+	<select id="selectRefundItemById" resultType="cn.csbe.web.cms.afterSale.bean.RefundOrderDetailDTO">
+		SELECT a.id,a.refundNo,b.orderSn,c.titleImg,b.productId,b.productName,d.userName,d.userId,a.createDate,a.refundType,
+		a.refundReason,a.refundAmount,b.productSubtotal
+		 FROM ds_refund_exchange a LEFT JOIN  ds_order_details b on a.orderDetailsId=b.id
+		LEFT JOIN ds_product_info c on c.id=b.productId LEFT JOIN pub_user d ON d.userId=a.userId where a.id= #{id} and a.status=1
+	</select>
+	<!-- 查询售后订单详情记录 -->
+	<select id="selectRefundItemByRefundId" resultType="cn.csbe.web.cms.afterSale.bean.RefundOrderRecord">
+		select a.*,b.userName,b.picture from ds_refund_log a 
+		 LEFT JOIN pub_user b on a.userId = b.userId
+		 where a.refundId= #{refundId} 
+		 order by createDate Desc
+	</select>
+	
+	<!-- 修改售后订单状态 -->
+	<update id="updateRefund">
+		update ds_refund_exchange set  approveStatus=#{approveStatus} ,modifyDate=#{modifyDate} where id=#{id}
+	</update>
+	<!-- 添加售后记录 -->
+	<insert id="addRefundRecord">
+		insert into ds_refund_log values(null,#{refundId},#{userId},#{refundRecord},#{createDate})
+	</insert>
+	
+	<!-- 根据订单编号查询订单id -->
+	<select id="selectOrderMasterIdById" resultType="int">
+		select orderMasterId from ds_refund_exchange where id = #{id}
+	</select>
+</mapper>

@@ -1,0 +1,43 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.csbe.web.cms.activities.mapper.RedPacketReceiveMapper">
+	
+	
+	<!-- 查询已领取红包 -->
+	<select id="selectAllRedPacketReceive" resultType="cn.csbe.web.cms.activities.bean.RedPacketReceive">
+		select a.*,c.userName,b.activityStatus,b.status from ds_activity_redpacket_receive a LEFT JOIN ds_activity_redpacket b
+			on a.redPacketId = b.id LEFT JOIN pub_user c on a.userId= c.userId
+		 where useStatus=1 and activityStatus=#{activityStatus} and b.status=1 and isRemit=#{isRemit} and redPacketId=#{redPacketId} limit #{start} ,#{rows}
+	</select>
+	<!-- 查询总条数 -->
+	<select id="countAllRedPacketReceive" resultType="int">
+		select count(*) from ds_activity_redpacket_receive a LEFT JOIN ds_activity_redpacket b
+			on a.redPacketId = b.id where useStatus=1 and activityStatus=#{activityStatus} and status=1 and isRemit=#{isRemit}  and redPacketId=#{redPacketId}
+	</select>
+	
+	<update id="changeRedPacketReceiveUseStatus">
+		update ds_activity_redpacket_receive set useStatus=2  where  redPacketId=#{redPacketId}
+	</update>
+	
+	<update id="changeRemitStatus">
+		update ds_activity_redpacket_receive set isRemit=1 ,remitTime=sysdate()
+		<where>
+			<foreach collection="array" open="(" close=")" separator="OR" item="rrid" >
+				id=#{rrid}
+			</foreach>
+		</where>   
+	</update>
+	
+	<!-- 查询领取人数 -->
+	<select id="countReceivePeoples" resultType="int">
+		select count(*) from ds_activity_redpacket_receive
+			where  redPacketId=#{redPacketId}
+	</select>
+	
+	<!-- 查询提现人数 -->
+	<select id="countWithDrawPeoples" resultType="int">
+		select count(*) from ds_activity_redpacket_receive
+			where  redPacketId=#{redPacketId} and useStatus=1
+	</select>
+	
+</mapper>

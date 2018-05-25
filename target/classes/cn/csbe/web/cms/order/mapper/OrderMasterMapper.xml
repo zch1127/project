@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.csbe.web.cms.order.mapper.OrderMasterMapper">
+	
+	<!--查询所有订单  -->
+	<select id="selectAllOrder" resultType="cn.csbe.web.cms.order.bean.OrderMaster">
+		select * from ds_order_master where status =1 order by createDate desc
+	</select>
+	
+	<!--根据订单状态去查询所有的订单  -->
+	<select id="selectOrderByState" resultType="cn.csbe.web.cms.order.bean.OrderMaster">
+		select * from ds_order_master where status =1 and orderStatus = #{stateValue} order by createDate desc
+	</select>
+	<!--根据订单编号去查询订单  -->
+	<select id="selectAllOrderBySn" resultType="cn.csbe.web.cms.order.bean.OrderMaster">
+		select * from ds_order_master where status =1 and orderSn=#{orderSn} order by createDate desc
+	</select>
+	<!--根据订单编号去修改订单状态   发货修改订单状态  以及发货时间 -->
+	<update id="updateById">
+		update ds_order_master set orderStatus = 2,shippingDate = sysDate() where id = #{id}
+	</update>
+	<!--根据订单状态去查询 一次查询一百个订单-->
+	<select id="selectByStatus" resultType="cn.csbe.web.cms.order.bean.OrderMaster">
+		select * from ds_order_master where status =1 and orderStatus = #{orderStatus} limit 0,100
+	</select>
+	<!-- 关闭未付款订单 修改订单状态  和关闭时间  -->
+	<update id="updateOrderStatusById">
+		update ds_order_master set orderStatus = 5,cancelDate = sysDate() where id = #{id} 
+	</update>
+	<!--自动收货 -->
+	<update id="updateOrderStatusByMasterId">
+		update ds_order_master set orderStatus = 3,receiptDate = sysDate() where id = #{id} 
+	</update>
+	<!--自动好评  -->
+	<update id="updateFinishStatus">
+		update ds_order_master set orderStatus = 4,finishDate = sysDate() where id = #{id} 
+	</update>
+	
+	<!-- 售后关闭订单 -->
+	<update id="updateRefundOrderStatusByOrderSn">
+		update ds_order_master set orderStatus = 5,cancelDate = sysDate() where id = #{orderMasterId} 
+	</update>
+</mapper>

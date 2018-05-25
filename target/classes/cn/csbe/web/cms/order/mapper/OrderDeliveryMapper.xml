@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.csbe.web.cms.order.mapper.OrderDeliveryMapper">
+	
+	<!--添加发货订单  -->
+	<insert id="addOrderDelivery">
+		insert into ds_order_delivery(orderMasterId,logisticsId,logisticsNumber,remark,createDate) 
+		values(#{orderMasterId},#{logisticsId},#{logisticsNumber},#{remark},#{createDate})
+	</insert>
+	<!--查询物流单号 -->
+	<select id="selectByOrderId" resultType="cn.csbe.web.cms.order.bean.OrderDelivery">
+		select * from ds_order_delivery where orderMasterId=#{id}
+	</select>
+	<!--验证物流单号  -->
+	<select id="validationOrderNum" resultType="cn.csbe.web.cms.order.bean.OrderDelivery">
+		select * from ds_order_delivery where logisticsNumber = #{logisticsNumber}
+	</select>
+	
+</mapper>

@@ -1,0 +1,37 @@
+imgserver=http\://localhost\:8080/buddha-bms/
+fileserver=http\://localhost\:8080/buddha-bms/
+
+uploadPath=/
+
+#theme ueditor img option  
+ueditorImg=C:/projectRain/ApacheTomcat/webapps/buddha-img/upload/news
+#ueditorImg=C:/projectRain/imgService/upload/news
+
+#fangwen url
+                    
+addlocalStr=https://www.baoyoubaoyou.cn/buddha-bms/ueditor//C:/projectRain/ApacheTomcat/webapps/buddha-img/
+localStr=https://www.baoyoubaoyou.cn:443/buddha-bms//ueditor//C:/projectRain/ApacheTomcat/webapps/buddha-img/
+#html page nei img
+imgHtmlPath=https://www.baoyoubaoyou.cn/buddha-img/
+htmlPath=https://www.baoyoubaoyou.cn/buddha-img/
+
+themeImg=images/theme
+wallImg=images/wallpager
+buddhaImg=images/buddha
+offeringsImg=images/offerings
+newImg=images/news
+productImg=images/product
+productTitleImg=images/product/title
+templeImg =images/temple
+alertImg =images/alert
+#tuisong
+noticeImg = images/notice
+#tuisongdizhi
+noticeUrl=https://www.baoyoubaoyou.cn/buddha-api/push/systemdaily
+payNoticeUrl=https://www.baoyoubaoyou.cn/buddha-api/push/muluser
+
+#wuliu
+WULIUURL = https://www.baoyoubaoyou.cn/buddha-api/logistics/record
+
+noticeIcon=user/list_icon_interactivity@2x.png
+logisticsleftIcon=user/list_icon_logistics@2x.png

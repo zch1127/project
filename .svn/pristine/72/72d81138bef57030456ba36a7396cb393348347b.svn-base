@@ -1,0 +1,66 @@
+package cn.csbe.web.cms.util;
+
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.Date;
+
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import cn.csbe.web.cms.common.DateUtils;
+import cn.csbe.web.cms.common.HttpRequest;
+import cn.csbe.web.cms.common.constantUtils;
+import cn.csbe.web.cms.push.bean.PubNotice;
+import cn.csbe.web.cms.push.service.PubNoticeService;
+
+/**
+ * 定时推送活动
+ * Title: QuartzWork  
+ * @author sxzhang 
+ * @date 上午9:44:51
+ */
+public class QuartzWork {
+	//日志信息
+	private static final Logger logger = LoggerFactory.getLogger(QuartzWork.class);
+	
+	@Autowired
+	private PubNoticeService pubNoticeService;
+	
+	/**
+	 * 定时推送活动 8:00 9:30 16:00  19:00 21:00
+	 * 同一个任务  五个定时去调用这个任务
+	 * @param time 
+	 * @throws UnsupportedEncodingException 
+	 */
+	public void work() throws UnsupportedEncodingException{
+		String dateTimeStr = DateUtils.getDateTimeStr(new Date(), "yyyy-MM-dd HH:mm");
+		//查询系统通知(固定通知、活动通知)
+		PubNotice pubNotice = pubNoticeService.queryByTime(dateTimeStr);
+		String sendPost="";
+		//在这个任务中不进行判断 在controller层进行数据的判断
+		if(pubNotice !=null){
+			String htmlurl="",introduction="",createDate="";
+			String title=URLEncoder.encode(pubNotice.getTitle(),"UTF-8");
+			String twoType=URLEncoder.encode(pubNotice.getTwoType().toString(),"UTF-8");
+			if(StringUtils.isNotEmpty(pubNotice.getIntroduction())){
+				introduction=URLEncoder.encode(pubNotice.getIntroduction(),"UTF-8");
+			}
+			if(!StringUtils.isEmpty(pubNotice.getHtmlUrl())){
+				htmlurl=URLEncoder.encode(pubNotice.getHtmlUrl(),"UTF-8");
+			}
+			if(!StringUtils.isEmpty(pubNotice.getCreateDate())){
+				createDate=URLEncoder.encode(pubNotice.getCreateDate(),"UTF-8");
+			}
+			
+			String param = "title="+title+"&introduction="+introduction+"&createDate="+createDate+"&htmlUrl="+htmlurl+"&type="+twoType;
+			System.out.println(param);
+//			sendPost = HttpRequest.sendPost("http://localhost/buddha-api/push/systemdaily", param);
+			sendPost = HttpRequest.sendPost(constantUtils.url, param);
+		}
+		
+		logger.info("========日志：定时推送任务结果   ============="+sendPost);
+	}
+	
+}

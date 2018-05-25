@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.csbe.web.cms.push.mapper.UserNoticeMapper">
+	
+	<insert id="addUserAndNoticeRelation">
+		insert into pub_notice_user 
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="noticeId !=null">
+				noticeId,
+			</if>
+			<if test="userId !=null">
+				userId,
+			</if>
+			
+			<if test="createDate !=null">
+				createDate,
+			</if>
+		</trim>
+		<trim prefix="values(" suffix=")" suffixOverrides=",">
+			<if test="noticeId !=null">
+				#{noticeId},
+			</if>
+			<if test="userId !=null">
+				#{userId},
+			</if>
+			<if test="createDate !=null">
+				#{createDate},
+			</if>
+			
+		</trim>
+	</insert>
+	
+	
+	
+	
+</mapper>

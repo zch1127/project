@@ -1,0 +1,235 @@
+<%@ page language="java" import="java.util.*" pageEncoding="utf-8"%>
+<%
+	String path = request.getContextPath();
+	String basePath = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort()
+			+ path + "/";
+%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+ 
+<title>新闻修改</title>
+<script type="text/javascript">
+ var basePath="<%=basePath %>";
+ window.UEDITOR_HOME_URL="<%=basePath %>/ueditor/";
+ </script>
+<script type="text/javascript" src="<%=basePath%>js/common/constants.js"></script>
+
+<link rel="stylesheet" type="text/css"
+	href="<%=basePath%>easyui/css/themes/default/easyui.css" />
+<link rel="stylesheet" type="text/css"
+	href="<%=basePath%>easyui/css/themes/icon.css" />
+<script type="text/javascript"
+	src="<%=basePath%>easyui/js/jquery.min.js"></script>
+<script type="text/javascript"
+	src="<%=basePath%>easyui/js/jquery.easyui.min.js"></script>
+<script type="text/javascript"
+	src="<%=basePath%>easyui/js/easyui-lang-zh_CN.js"></script>
+
+
+<script type="text/javascript" src="<%=basePath%>ueditor/ueditor.config.js"></script>
+<script type="text/javascript" src="<%=basePath%>ueditor/ueditor.all.js"></script>
+<link rel="stylesheet" type="text/css" href="<%=basePath%>ueditor/themes/iframe.css"/> 
+
+<script type="text/javascript" src="<%=basePath%>js/common/common.js"></script>
+<script type="text/javascript">
+$(function() {
+	var picture = $("#picture").val();
+	//alert(picture);
+	if(picture != ""){
+		$("#imgPreview").attr('src',domain+picture);
+	}
+	//给寺院指定具体的名字
+	var value=$("#cateSelect").val();
+	var templeId = $("#tId").val();
+	//alert(templeId);
+	if(value=="3"||value=="4"){
+		$.ajax({
+			type:"get",  
+			url:"${pageContext.request.contextPath}/temple/queryAllTemple",  
+			dataType:'json', 
+			success:function(data){
+			console.log(data);
+				$.each(data,function(index,data){
+					if(data.templeId == templeId){
+						$("#templeId").append("<option selected='selected' value="+data.templeId+">"+data.templeName+"</option>");		
+					}else{
+						$("#templeId").append("<option value="+data.templeId+">"+data.templeName+"</option>");				
+					}
+				});
+			}
+		});
+	}else{
+		$("#appendNewId").empty();
+	}
+	$("#btnUpload").click(
+			function() {
+				var formData = new FormData();
+				formData.append("upfile",
+						document.getElementById("file").files[0]);
+				$.ajax({
+					url : "upload/pictrue",
+					type : "POST",
+					data : formData,
+					/**
+					 * 必须false才会自动加上正确的Content-Type
+					 */
+					contentType : false,
+					/**
+					 * 必须false才会避开jQuery对 formdata 的默认处理 XMLHttpRequest会对
+					 * formdata 进行正确的处理
+					 */
+					processData : false,
+					success : function(data) {
+						console.log(data);
+						$.messager.show({
+							title : "系统消息",
+							msg : data.message
+						});
+						$("#imgPreview").attr("src",
+								domain  + data.object);
+						$("#picture").val(data.object);
+					},
+					error : function() {
+						alert("上传失败！");
+						$("#imgWait").hide();
+					}
+				});
+			});
+	//下拉框change事件
+	$("#cateSelect").change(function(){
+		//alert("进到了这个方法中");
+		var value=$("#cateSelect").val();
+		if(value=="3" || value== "4"){
+			$("#appendNewId").empty();
+			$("#appendNewId").append('<select id="templeId"  name="templeId" style="width:200px;"></select>');
+			$.ajax({
+				type:"get",  
+				url:"${pageContext.request.contextPath}/temple/queryAllTemple",  
+				dataType:'json', 
+				success:function(data){
+					$.each(data,function(index,data){
+						$("#templeId").append("<option value="+data.templeId+">"+data.templeName+"</option>");		
+					});
+				}
+			});
+		}else{
+			$("#appendNewId").empty();
+		}
+	});
+	$("#btnSubmit").click(function() {
+		var parameter = getParameter();
+		if(parameter){
+			curd('updateInformation', parameter);
+			window.localhost.href="${pageContext.request.contextPath}/information/toShowInformation";
+		}
+	});
+});
+
+//获取表单数据
+function getParameter() {
+	var infoId = $("#newsid").val();
+	var infoName = $("#newsTitle").val();
+	var infoImg = $("#picture").val();
+	var infoContent = $("#newsIntroduction").val();
+	var type = $("#cateSelect").val();//新闻类型
+	if(type =="3"||type=="4"){
+		var templeId = $("#templeId").val();
+	}else{
+		var templeId = -1;
+	}
+	var newsContent = UE.getEditor('myEditor').getContent();//主题描述，用于生成html页面
+	var htmlUrl=$("#content").html();//编辑页面用，原htmlurl链接
+	var createTime = $("#ksDate").val();
+	if (newsTitle == "") {
+		alert("请输入新闻标题");
+		return false;
+	}
+	if(infoContent==""){
+		alert("请输入主题内容");
+		return false;
+	}
+
+	var parameter = {
+		infoId : infoId,
+		infoName : infoName,
+		infoImg : infoImg,
+		infoContent : infoContent,
+		type : type,
+		htmlUrl : newsContent,
+		param:htmlUrl,
+		templeId:templeId,
+		createTime:createTime,
+	};
+	return parameter;
+
+}
+
+</script>
+</head>
+
+<body>
+	<table>
+		<input id="newsid" type="hidden" value="${newsInformation.infoId}" />
+		<input type="hidden" id="tId" value="${newsInformation.templeId }">
+		<tr>
+			<td>新闻资讯主题</td>
+			<td><input id="newsTitle" style="width: 300px"
+				class="easyui-textbox" type="text" placeholder="新闻标题"
+				value="${newsInformation.infoName}" required="true"></td>
+		</tr>
+		<tr>
+			<td>新闻主题内容</td>
+			<td><input id="newsIntroduction" data-options="multiline:true"
+				style="height: 60px; width: 300px" class="easyui-textbox"
+				type="text" placeholder="新闻标题" value="${newsInformation.infoContent}"></td>
+		</tr>
+		<tr>
+			<td>新闻分类</td>
+			<td>
+			<select id="cateSelect" name="aa" style="width:300px;">  
+		            <option value="0"  <c:if test="${newsInformation.type==0 }">selected</c:if>>实时</option>
+		            <option value="1"  <c:if test="${newsInformation.type==1 }">selected</c:if>>活动</option>
+		            <option value="2"  <c:if test="${newsInformation.type==2 }">selected</c:if>>政策</option>
+		            <option value="3"  <c:if test="${newsInformation.type==3 }">selected</c:if>>寺院</option>
+		            <option value="4"  <c:if test="${newsInformation.type==4 }">selected</c:if>>实时活动资讯</option>
+		    </select>  
+			</td>
+			<td id="appendNewId"><select id="templeId" style="width:200px;"></select></td>
+		</tr>
+		<tr>
+			<td>发布时间</td>
+			<td>
+			<input class="easyui-datetimebox" id="ksDate" name="createTime" data-options="required:true,showSeconds:false"
+     			style="width:300px">
+			</td>
+		</tr>
+		<tr>
+			<td>新闻图片</td>
+			<td><img id="imgPreview" width="150"  src="../images/defaultImg.jpg"/><br/>
+			 <input id="picture"  name="picture" type="text" hidden="1" value="${newsInformation.infoImg}" />
+				<input id="file" name="file" type="file" />
+				<a id="btnUpload" href="#" class="easyui-linkbutton">上传图片</a></td>
+		</tr>
+        <tr>
+			<td>新闻内容</td>
+			<td>
+			   	<div style="display: none;"><p id="content" >${newsInformation.htmlUrl }</p></div>
+				<div id="myEditor"  style="width: 600px; height: 300px;">
+				<script type="text/javascript" charset="utf-8">
+						var editor = new baidu.editor.ui.Editor();
+						editor.render("myEditor");
+					</script>
+				</div>	
+		 </td>
+		</tr>
+		<tr>
+			<td colspan="2" align="center"><a id="btnSubmit" href="#"
+				class="easyui-linkbutton">更新表单</a></td>
+		</tr>
+	</table>
+
+	<script type="text/javascript" src="<%=basePath%>js/news/editNews.js"></script>
+</body>
+</html>

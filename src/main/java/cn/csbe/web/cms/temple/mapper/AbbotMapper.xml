@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.csbe.web.cms.temple.mapper.AbbotMapper">
+	
+
+	<!--查询  -->
+	<select id="selectAbbot" resultType="cn.csbe.web.cms.temple.bean.Abbot">
+		select * from pub_abbot
+	</select>
+	<!--selectById  -->
+	<select id="selectAbbotById" resultType="cn.csbe.web.cms.temple.bean.Abbot">
+		select * from pub_abbot where abbotId = #{abbotId}
+	</select>
+</mapper>

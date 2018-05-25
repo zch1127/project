@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.csbe.web.cms.product.mapper.CategoryMapper">
+	
+		<!--查询所有二级分类信息  发布商品的时候根据查询到的数据进行类别的选择-->
+		<select id="selectAllCategory" resultType="cn.csbe.web.cms.product.bean.ProductCategory">
+			select * from ds_product_category where status = 1 and parentId is not null or parentId =0
+		</select>
+		
+		<!--查询一级分类  -->
+		<select id="selectProductCategory" resultType="cn.csbe.web.cms.product.bean.ProductCategory">
+			select * from ds_product_category where status = 1 and parentId is null or parentId =0 order by orderList ASC
+		</select>
+		
+		<!--查询一级分类下商品的总数量  -->
+		<select id="selectNumberByFirstId" resultType="int">
+			select count(*) from ds_product_info where productCategoryId in (
+				select id from ds_product_category where status = 1 and parentId = #{id})
+		</select>
+		
+		<!--查询二级分类信息  -->
+		<select id="selectCategoryByPid" resultType="cn.csbe.web.cms.product.bean.ProductCategory">
+			select * from ds_product_category where status = 1 and parentId = #{id}
+		</select>
+		<!--根据id查询分类信息  -->
+		<select id="showCategoryById" resultType="cn.csbe.web.cms.product.bean.ProductCategory">
+			select * from ds_product_category where id=#{id}
+		</select>
+		
+		
+		<!--查询二级分类的下的商品的数量  -->
+		<select id="selectNumberByPid" resultType="int">
+			select count(*) from ds_product_info where productCategoryId = #{id}
+		</select>
+		<!--添加类别  -->
+		<insert id="addFirstCategory">
+			insert into ds_product_category(name,parentId,createDate) values(#{name},#{id},#{createDate});
+		</insert>
+		<!--删除一级类别下的二级信息   伪删除  修改-->
+		<update id="deleteCategory">
+			update ds_product_category set status = 0 where parentId =#{id}
+		</update>
+		<!--删除对应id的类别  -->
+		<update id="deleteCategoryById">
+			update ds_product_category set status = 0 where id =#{id}
+		</update>
+		<!--修改分类信息  -->
+		<update id="updateProductCategory">
+			update ds_product_category set name=#{name} where id =#{id}
+		</update>
+	
+</mapper>

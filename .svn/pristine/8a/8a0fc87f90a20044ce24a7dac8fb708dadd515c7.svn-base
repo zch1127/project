@@ -1,0 +1,125 @@
+package cn.csbe.web.cms.push.controller;
+
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.ModelAndView;
+
+import cn.csbe.web.cms.common.DateUtils;
+import cn.csbe.web.cms.common.constantUtils;
+import cn.csbe.web.cms.push.bean.PubNotice;
+import cn.csbe.web.cms.push.service.PubNoticeService;
+import cn.csbe.web.cms.push.service.UserNoticeService;
+
+/**
+ * 推送活动
+ * Title: PubNoticeController  
+ * @author sxzhang 
+ * @date 下午1:56:54
+ */
+@Controller
+@RequestMapping("push")
+public class PubNoticeController {
+	@Autowired
+	private PubNoticeService pubNoticeService;
+	@Autowired
+	private UserNoticeService userNoticeService;
+	/**
+	 * toShowAllPush
+	 * @return
+	 */
+	@RequestMapping("toShowAllPush")
+	public Object toShowAllPush(){
+		
+		return "/notice/showAllPush";
+	}
+	/**
+	 * toAddNotice
+	 * @return
+	 */
+	@RequestMapping("toAddNotice")
+	public Object toAddNotice(){
+		
+		return "/notice/addNotice";
+	}
+	/**
+	 * toEditPush
+	 * 跳转到编辑页面
+	 */
+	@RequestMapping("toEditPush")
+	private ModelAndView toEditPush(String noticeId) throws Exception {
+
+		ModelAndView view = new ModelAndView();
+
+		PubNotice obj = pubNoticeService.findById(noticeId);
+		view.addObject("notice", obj);
+		System.out.println(obj.getTwoType()+"======================================="+obj.getIntroduction());
+		view.setViewName("notice/editNotice");
+
+		return view;
+	}
+	
+	/**
+	 * 展示全部推送活动
+	 * @param page
+	 * @param rows
+	 * @return
+	 */
+	@RequestMapping("showAllPush")
+	@ResponseBody
+	public Map<String,Object> showAllPush(Integer page,Integer rows){
+		
+		Map<String,Object> map = new HashMap<String,Object>(); 
+		map = pubNoticeService.queryAllPush(page,rows);
+		return map;
+	}
+	
+	/**
+	 * 添加推送
+	 * addNotice
+	 * @return
+	 */
+	@RequestMapping("/addNotice")
+	@ResponseBody
+	public boolean addNotice(PubNotice pubNotice) throws Exception{
+		String time=DateUtils.getDateTimeStr(new Date(), "yyyy-MM-dd HH:mm");
+		System.out.println(pubNotice.getTwoType());
+		pubNotice.setNoticeId(constantUtils.get_id());
+		pubNotice.setLeftIcon(constantUtils.noticeIcon);
+		boolean isAdd = pubNoticeService.addNotice(pubNotice);
+		return isAdd;
+	}
+	
+	/**
+	 * 删除数据
+	 * deleteNotice
+	 */
+	@RequestMapping("deleteNotice")
+	@ResponseBody
+	public boolean deleteNotice(String[] noticeId){
+		boolean isDelete = pubNoticeService.deleteNotice(noticeId);
+		return isDelete;
+	}
+	
+	/**
+	 * 编辑数据
+	 * editNotice
+	 * @return
+	 */
+	@RequestMapping("editNotice")
+	@ResponseBody
+	public boolean editNotice(PubNotice pubNotice){
+		pubNotice.setModifyDate(DateUtils.getDateTimeStr(new Date(), "yyyy-MM-dd HH:mm"));//设置修改时间
+		System.out.println(pubNotice);
+		boolean isEdit = pubNoticeService.editNotice(pubNotice);
+		
+		return isEdit;
+	}
+	
+	
+}

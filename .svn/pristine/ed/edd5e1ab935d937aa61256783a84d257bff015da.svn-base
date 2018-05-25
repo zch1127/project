@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.csbe.web.cms.product.mapper.AttributeMapper">
+	
+	<!--添加商品参数  -->
+	<insert id="addAttribute">
+		insert into ds_product_attribute(productId,attrName,attrValue,enableStatus,createDate,modifyDate)
+		 values(#{productId},#{attrName},#{attrValue},1,#{createDate},null)
+	</insert>
+	<!--根据商品id去查询参数数据  -->	
+	<select id="selectByProductId" resultType="cn.csbe.web.cms.product.bean.ProductAttribute">
+		select * from ds_product_attribute where productId =#{id}
+	</select>
+	<!--根据商品id进行参数删除  -->
+	<delete id="deleteAtt">
+		DELETE from ds_product_attribute where productId = #{id}
+	</delete>
+</mapper>

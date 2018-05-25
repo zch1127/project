@@ -1,0 +1,26 @@
+package cn.csbe.web.cms.activities.service;
+
+import java.util.List;
+
+import cn.csbe.web.cms.activities.bean.Coupon;
+
+public interface CouponService {
+	//根据活动状态查看优惠券信息
+	List<Coupon> showAllCoupon(Integer activityStatus);
+
+	boolean deleteCoupon(int id);
+
+	boolean addCoupon(Coupon coupon);
+	
+	//跳转到更新页面
+	Coupon toUpdateCoupon(int id);
+	//更新
+	boolean updateCoupon(Coupon coupon);
+	
+	//定时改变优惠券活动状态
+	List<Coupon> selectStartEndDate();
+	
+	boolean changeCouponActivityStatus(int id,int activityStatus);
+
+	List<Coupon> showAllCoupon();
+}

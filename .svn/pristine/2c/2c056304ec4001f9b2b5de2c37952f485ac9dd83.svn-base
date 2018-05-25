@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.csbe.web.cms.temple.mapper.TempleMapper">
+	
+
+	<!--查询  -->
+	<select id="selectTempleByAbbotId" resultType="cn.csbe.web.cms.temple.bean.Temple">
+		select * from pub_temple where status = 1 and abbotId=#{id}
+	</select>
+	<!--查询全部  分页-->
+	<select id="selectAllTemple" resultType="cn.csbe.web.cms.temple.bean.Temple">
+		select * from pub_temple where status = 1 limit #{page},#{rows}
+	</select>
+	<!--query total  -->
+	<select id="selectCount" resultType="int">
+		select count(*) from pub_temple where status = 1
+	</select>
+	<!--批量删除  逻辑删除  -->
+	<update id="deleteTemple">
+		update pub_temple set status = 0 where templeId in
+		<foreach collection="array" item="idll" open="(" close=")" 
+		separator=",">#{idll}</foreach>
+	</update>
+	<!--添加数据  -->
+	<insert id="addTemple">
+		insert into pub_temple(templeName,imgUrl,content,createTime,backgroundImgUrl,address,abbotId,status)
+		values(#{templeName},#{imgUrl},#{content},sysDate(),#{backgroundImgUrl},#{address},#{abbotId},1)
+	</insert>
+	<!--根据ID查询  -->
+	<select id="selectTempleById" resultType="cn.csbe.web.cms.temple.bean.Temple">
+		select * from pub_temple where templeId=#{templeId}
+	</select>
+	<!-- 查询全部 -->
+	<select id="queryAllTemple" resultType="cn.csbe.web.cms.temple.bean.Temple">
+		select * from pub_temple where status = 1
+	</select>
+	<!--修改  -->
+	<update id="updateTemple">
+		update pub_temple set templeName = #{templeName},updateTime = sysDate(),imgUrl = #{imgUrl},abbotId = #{abbotId},address = #{address},content = #{content}
+		where templeId = #{templeId}
+	</update>
+</mapper>

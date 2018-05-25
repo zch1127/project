@@ -1,0 +1,166 @@
+package cn.csbe.web.cms.util;
+
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+
+import cn.csbe.web.cms.activities.bean.Coupon;
+import cn.csbe.web.cms.activities.bean.CouponReceive;
+import cn.csbe.web.cms.activities.service.CouponReceiveService;
+import cn.csbe.web.cms.activities.service.CouponService;
+import cn.csbe.web.cms.common.DateUtils;
+import cn.csbe.web.cms.order.bean.OrderComment;
+import cn.csbe.web.cms.order.bean.OrderCostTime;
+import cn.csbe.web.cms.order.bean.OrderDetail;
+import cn.csbe.web.cms.order.bean.OrderMaster;
+import cn.csbe.web.cms.order.service.CommentService;
+import cn.csbe.web.cms.order.service.OrderCostService;
+import cn.csbe.web.cms.order.service.OrderDetailService;
+import cn.csbe.web.cms.order.service.OrderMasterService;
+import cn.csbe.web.cms.push.bean.PubUser;
+import cn.csbe.web.cms.user.service.PubUserCouponService;
+
+
+/**
+ * @author sxzhang
+ * 创建时间：2017-12-7下午14:10:29
+ * 描述：定时器执行类
+ */
+public class QuartzJob2 {
+	@Autowired
+	private OrderMasterService orderMasterService;
+	@Autowired
+	private OrderCostService orderCostService;
+	@Autowired
+	private OrderDetailService orderDetailService;
+	@Autowired
+	private CommentService commentService;
+	@Autowired
+	private PubUserCouponService pubUserCouponService;
+	@Autowired
+	private CouponService couponService;
+	@Autowired
+	private CouponReceiveService couponReceiveService;
+	
+	public void work(){  
+	 /**
+	  *  定时更新 用户下单  发货时间超过15天  自动收货
+	  *       a. 发货时间
+	  *       b. 将订单数据更新状态为已完成
+	  */
+		Date date = new Date();  
+		long time = date.getTime();//当前时间
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		int orderStatus = 2;
+		Date dd = null; //初始化date
+		List<OrderMaster> list = orderMasterService.selectByStatus(orderStatus);
+		OrderCostTime cs =orderCostService.selectById(1); 
+		if(list.size()!=0){
+			for (OrderMaster orderMaster : list) {
+				String str =orderMaster.getShippingDate();
+				if(str==""||str==null){
+					continue;
+				}else{
+					try {
+						dd = sdf.parse(str); //Mon Jan 14 00:00:00 CST 2013
+						long time2 = dd.getTime();
+						long time1 = time-time2;
+						long time3 = cs.getTotalTime();
+						if(time1 >= time3){
+							int id = orderMaster.getId();
+							boolean isUpdate = orderMasterService.updateOrderStatusByMasterId(id);
+							if(isUpdate){
+								System.out.println("处理成功");
+							}else{
+								System.out.println("清理失败");
+							}
+						}
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
+			}	
+		}else{
+			System.out.println("没有要处理的订单了");
+		}
+		
+		 /**
+		  *  定时更新 订单收货时间超过7天 自动好评
+		  *       a. 查询订单完成的时间
+		  *       b. 将过期订单数据更新状态为失效  
+		  *     
+		  */
+		int orderStatus1 = 3;
+		List<OrderMaster> list1 = orderMasterService.selectByStatus(orderStatus1);
+		OrderCostTime costTime =orderCostService.selectById(1); 
+		if(list1.size()!=0){
+			for (OrderMaster orderMaster : list1) {
+				String str =orderMaster.getReceiptDate();
+				if(str==""||str==null){
+					continue;
+				}else{
+					try {
+						dd = sdf.parse(str); //Mon Jan 14 00:00:00 CST 2013
+						long time2 = dd.getTime();
+						long time1 = time-time2;
+						long time3 = costTime.getFinishDate();
+						if(time1 >= time3){
+							int id = orderMaster.getId();
+							boolean isUpdate = orderMasterService.updateFinishStatus(id);
+							String orderNumber = orderMaster.getOrderSn();
+							List<OrderDetail> list2 = orderDetailService.selectAllDetailOrderByOrderSn(orderNumber);
+							if(list1.size()!=0){
+								for (OrderDetail orderDetail : list2) {
+									OrderComment com = new OrderComment();
+									com.setProductId(orderDetail.getProductId());
+									com.setUserId(orderDetail.getUserId());
+									com.setOrderDetailsId(orderDetail.getId());
+									com.setCommentContent("用户默认五星好评!!!");
+									boolean isAdd = commentService.addComment(com);
+									if(isUpdate&&isAdd){
+										System.out.println("处理成功");
+									}else{
+										System.out.println("编号为"+orderDetail.getId()+"的订单处理失败");
+									}
+								}
+							}
+						}
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
+			}
+		}else{
+			System.out.println("没有要处理的订单了8888888");
+		}
+		/**
+		 * 定时给用户添加优惠券信息
+		 */
+		//1.先查询出 没有优惠券信息的用户的id
+		List<PubUser> pubUser = pubUserCouponService.queryUserId();
+		//2.遍历list集合  拿到对应的id  进行数据的修改   添加进数据库中
+		if(pubUser.size()!=0){
+			List<Coupon> coupon = couponService.queryNewCoupon();
+			CouponReceive couponReceive = new CouponReceive();
+			for(Coupon coupon1 : coupon){
+				for (PubUser pubUser2 : pubUser) {
+					int userId = pubUser2.getUserId();
+					couponReceive.setCouponId(coupon1.getId());
+					couponReceive.setUserId(userId);
+					Timestamp ts = Timestamp.valueOf(sdf.format(date));
+					couponReceive.setReceivedTime(ts);
+					couponReceive.setUseStatus(0);
+					boolean isAdd = couponReceiveService.add(couponReceive);
+				}
+			}
+		}
+    }
+	
+	
+	
+	
+	
+}

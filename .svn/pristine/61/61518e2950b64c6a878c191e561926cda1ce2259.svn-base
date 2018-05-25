@@ -1,0 +1,94 @@
+package cn.csbe.web.cms.afterSale.service.impl;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import cn.csbe.web.cms.afterSale.bean.RefundOrderDTO;
+import cn.csbe.web.cms.afterSale.bean.RefundOrderDetailDTO;
+import cn.csbe.web.cms.afterSale.bean.RefundOrderRecord;
+import cn.csbe.web.cms.afterSale.bean.RefundSearchObj;
+import cn.csbe.web.cms.afterSale.mapper.RefundOrderMapper;
+import cn.csbe.web.cms.afterSale.service.OrderRefundService;
+import cn.csbe.web.cms.order.mapper.OrderMasterMapper;
+@Service
+public class OrderRefundServiceImpl implements OrderRefundService {
+
+	@Autowired
+	private RefundOrderMapper refundOrderMapper;
+	@Autowired
+	private OrderMasterMapper orderMasterMapper;
+	
+	@Override
+	public List<RefundOrderDTO> selectAllOrderRefundByStatus(
+			Integer approveStatus) {
+		// TODO Auto-generated method stub
+		List<RefundOrderDTO> list = new ArrayList<RefundOrderDTO>();
+		if(approveStatus==4){
+			list = refundOrderMapper.selectRefundOrderByStatus1(approveStatus);
+		}
+		if(approveStatus!=4){
+			list = refundOrderMapper.selectRefundOrderByStatus2(approveStatus);
+		}
+		return list;
+	}
+
+	@Override
+	public List<RefundOrderDTO> selectRefundOrderByCon(RefundSearchObj rso) {
+		// TODO Auto-generated method stub
+		List<RefundOrderDTO> list = refundOrderMapper.selectRefundOrderByCon(rso);
+		return list;
+	}
+	//查询退款详情
+	@Override
+	public RefundOrderDetailDTO selectRefundItemById(Integer id) {
+		// TODO Auto-generated method stub
+		RefundOrderDetailDTO rodd= refundOrderMapper.selectRefundItemById(id);
+		System.out.println(rodd);
+		//查询退款记录
+		List<RefundOrderRecord> ror = refundOrderMapper.selectRefundItemByRefundId(id);
+		rodd.setList(ror);
+		return rodd;
+	}
+
+	@Override
+	public boolean addRecordAndUpdateRefund(Integer id,Integer approveStatus,RefundOrderRecord ror)  {
+		SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		String date =sdf.format(System.currentTimeMillis());
+		Date dd = new Date();
+		try {
+			dd = sdf.parse(date);
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		ror.setCreateDate(dd);
+		String refundRecord2="卖家已拒绝本次申请";
+		String refundRecord3="卖家通过了本次申请";
+		int j=0;
+		if(approveStatus==2){
+			ror.setRefundRecord(refundRecord2);
+			j = refundOrderMapper.addRefundRecord(ror);
+		}
+		if(approveStatus==3){
+			ror.setRefundRecord(refundRecord3);
+			j = refundOrderMapper.addRefundRecord(ror);
+		}
+		//更新售后订单状态
+		int i = refundOrderMapper.updateRefund(id,approveStatus,dd);
+		//更新订单状态
+		int k=orderMasterMapper.updateRefundOrderStatusByOrderSn(refundOrderMapper.selectOrderMasterIdById(id));
+		if(i>0&&j>0&&k>0){
+			return true;
+		}
+		return false;
+	}
+	
+	
+
+}

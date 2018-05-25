@@ -1,0 +1,399 @@
+<%@ page language="java" import="java.util.*" pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%
+	String path = request.getContextPath();
+	String basePath = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort()
+			+ path + "/";
+%>
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+
+<title>商品管理</title>
+
+<script type="text/javascript" src="<%=basePath%>js/common/constants.js"></script>
+
+<link rel="stylesheet" type="text/css"
+	href="<%=basePath%>easyui/css/themes/default/easyui.css">
+<link rel="stylesheet" type="text/css"
+	href="<%=basePath%>easyui/css/themes/icon.css">
+<link rel="stylesheet" type="text/css"
+	href="<%=basePath%>easyui/css/demo.css">
+
+<script type="text/javascript"
+	src="<%=basePath%>easyui/js/jquery.min.js"></script>
+<script type="text/javascript"
+	src="<%=basePath%>easyui/js/jquery.easyui.min.js"></script>
+
+<script type="text/javascript"
+	src="<%=basePath%>easyui/js/easyui-lang-zh_CN.js"></script>
+
+<script type="text/javascript" src="<%=basePath%>js/common/common.js"></script>
+<script type="text/javascript">
+	$(function(){
+		$("#addProduct").dialog({
+			closed:true
+		});
+		$("#updateProduct").dialog({
+			closed:true
+		});
+		$("#showProduct").dialog({
+			closed:true
+		});
+		
+		$("#showAllAlert").datagrid({
+			queryParams: {
+				status:null
+			},
+			url:"${pageContext.request.contextPath}/alert/selectAllAlert",
+			method:"GET",
+			pagination:true,
+		    pageNumber:1,
+		    pageSize:10,
+		    pageList:[10,20],
+			columns:[[    
+					{field:"",title:"",checkbox:true},
+			        {field:"alertId",title:"活动编号",width:160,align:"center",hidden:true},
+			        {field:"name",title:"活动标题",width:250,align:"center"},
+			        {field:"imgUrl",title:"弹窗图片",width:150,align:"center",
+			        	formatter : function(value, rowData,rowIndex) {
+											/*数据图片  */
+							return "<img src='"+ value + "' style='width:120px;height:90px'/>";
+						}
+			        },
+			        {field:"beginTime",title:"开始时间",width:160,align:"center",
+			         formatter:function(value, rowData,rowIndex){
+			        	var date = new Date(value);
+					    var y = date.getFullYear().toString();
+					    var m = (date.getMonth() + 1);
+					    var d = date.getDate().toString();
+					    var h = date.getHours().toString();
+					    var i = date.getMinutes().toString();
+					    var s = date.getSeconds().toString();
+					    //+ ':' + (s < 10 ? '0' + s : s)
+					    return y + '-' + (m < 10 ? '0' + m : m) + '-' + (d < 10 ? '0' + d : d)+ '  ' + (h < 10 ? '0' + h : h) + ':' + (i < 10 ? '0' + i : i)+ ':' + (s < 10 ? '0' + s : s) ;
+			        }},  
+			        {field:"endTime",title:"结束时间",width:160,align:"center", formatter:function(value, rowData,rowIndex){
+			        	var date = new Date(value);
+					    var y = date.getFullYear().toString();
+					    var m = (date.getMonth() + 1);
+					    var d = date.getDate().toString();
+					    var h = date.getHours().toString();
+					    var i = date.getMinutes().toString();
+					    var s = date.getSeconds().toString();
+					    //+ ':' + (s < 10 ? '0' + s : s)
+					    return y + '-' + (m < 10 ? '0' + m : m) + '-' + (d < 10 ? '0' + d : d)+ '  ' + (h < 10 ? '0' + h : h) + ':' + (i < 10 ? '0' + i : i)+ ':' + (s < 10 ? '0' + s : s) ;
+			        }},  
+			        {field:"detailsUrl",title:"活动详情链接地址",width:200,align:"center"}
+			]]
+		});
+
+		$("#status").change(function(){
+			var value=$("#status").val();
+			if (value == 1) {
+				value = encodeURI(value);
+				$("#newSpan").html("");
+				$("#newSpan").html('<input type="button" onclick="editPro()" value="编辑"/>&nbsp;&nbsp;&nbsp;<input type="button" onclick="deletePro()" value="删除"/>&nbsp;&nbsp;&nbsp;<input type="button" onclick="addPro()" value="添加"/>');
+				$("#showAllAlert").datagrid("load", {
+					status :value
+				});
+			}else if(value==2){
+				value = encodeURI(value);
+				$("#newSpan").html("");
+				$("#newSpan").html('<input type="button" onclick="editPro()" value="编辑"/>&nbsp;&nbsp;&nbsp;<input type="button" onclick="deletePro()" value="删除"/>&nbsp;&nbsp;&nbsp;<input type="button" onclick="addPro()" value="添加"/>');
+				$("#showAllAlert").datagrid("load", {
+					status :value
+				});
+			}else if(value == 3){
+				value = encodeURI(value);
+				$("#newSpan").html("");
+				$("#newSpan").html('<input type="button" onclick="showPro()" value="查看"/>&nbsp;&nbsp;&nbsp;<input type="button" onclick="deletePro()" value="删除"/>&nbsp;&nbsp;&nbsp;<input type="button" onclick="addPro()" value="添加"/>');
+				$("#showAllAlert").datagrid("load", {
+					status :value
+				});
+			}else{
+				value = encodeURI(value);
+				$("#showAllAlert").datagrid("load", {
+					status :value
+				});
+			}
+	});
+	
+});
+	/*删除功能  */
+	function deletePro(){
+		var value = 0;
+		var allSelected = $("#showAllAlert").datagrid("getSelections");
+		//console.log(allSelected);
+		if(allSelected.length == 0){
+			$.messager.alert("删除确认","请选择要删除的商品","warning");			
+		}else{
+			$.messager.confirm("确认删除","确认要删除选中的商品吗",function(r){
+				if(r){
+					var ids= new Array(allSelected.length); 
+					for(var i =0;i<allSelected.length;i++){
+						ids[i] = allSelected[i].alertId;
+					}
+					$.ajax({
+						url:"${pageContext.request.contextPath}/alert/deleteManyAlertActivity",
+						data:"alertId="+ids,
+						dataType:"JSON",
+						success:function(data){
+							if(data){
+								alert("操作成功");
+								
+							}else{
+								alert("操作失败,请重新操作");
+							}
+							$("#showAllAlert").datagrid("load", {
+								status :value
+							});
+						}
+					});	
+				}
+			});
+		}		
+	}
+	//弹窗
+	function addPro(){
+		$("#addProduct").dialog({
+			closed:false,
+			title:"添加活动"
+		});
+	}
+	//添加功能  
+	function addProduct(){
+		$("#addProduct").dialog({
+			closed:true
+		});
+		var value = 0;
+		var publishDate = $("#ksDate").val();
+		var endDate = $("#endDate").val();
+		if(publishDate>endDate){
+			alert("开始时间不能大于结束时间");
+		}else{
+			$("#addProduct").form("submit",{
+				url:"${pageContext.request.contextPath}/alert/addAlert",
+				dataType:"json",
+				success:function(data){
+					if(data){
+						alert("添加数据成功");
+					};
+					$("#addProduct").form("reset");
+					$("#showAllAlert").datagrid("load", {
+						status :value
+					});
+				}	
+			});
+		}
+	}
+	
+	/*编辑功能   点击跳转到添加的页面  把数据赋值给添加模块*/
+	function editPro(){
+		var selected = $("#showAllAlert").datagrid("getSelections");
+		console.log(selected);
+		var alertId=selected[0].alertId;
+		if(selected.length!=1){
+			$.messager.confirm("提示信息","请选择一行数据","warning");
+		}else{
+			$.messager.confirm("确认修改","确认修改么",function(r){    
+			    if(r){
+			    	$("#alertId").val(selected[0].alertId);
+			    	$("#name").val(selected[0].name);
+			    	$("#detailsUrl").val(selected[0].detailsUrl);
+			    	$("#beginTime").val(selected[0].beginTime);
+			    	$("#endTime").val(selected[0].endTime);
+			    	$("#picture1").val(selected[0].imgUrl);
+				    $("#updateProduct").dialog({
+						closed:false,
+						title:"修改弹窗活动"
+					});
+			    }
+			}); 
+		}	
+	}
+	//修改功能  
+	function updateProduct(){
+		$("#updateProduct").dialog({
+			closed:true
+		});
+		var value = 0;
+		var publishDate = $("#beginTime").val();
+		var endDate = $("#endTime").val();
+		if(publishDate>endDate){
+			alert("开始时间不能大于结束时间");
+		}else{
+			$("#updateProduct").form("submit",{
+				url:"${pageContext.request.contextPath}/alert/updateAlert",
+				dataType:"json",
+				success:function(data){
+					if(data){
+						alert("修改数据成功");
+					};
+					$("#updateProduct").form("reset");
+					$("#showAllAlert").datagrid("load", {
+						status :value
+					});
+				}	
+			});
+		}
+	}
+	//查看数据
+	function showPro(){
+		var selected = $("#showAllAlert").datagrid("getSelections");
+		console.log(selected);
+		var alertId=selected[0].alertId;
+		if(selected.length!=1){
+			$.messager.confirm("提示信息","请选择一行数据","warning");
+		}else{
+			$.messager.confirm("查看活动","确认查看选中的数据吗",function(r){    
+			    if(r){
+			    	$("#aId").val(selected[0].alertId);
+			    	$("#aname").val(selected[0].name);
+			    	$("#details").val(selected[0].detailsUrl);
+			    	$("#aTime").val(selected[0].beginTime);
+			    	$("#eTime").val(selected[0].endTime);
+			    	$("#picture2").val(selected[0].imgUrl);
+			    	//弹窗
+			    	$("#showProduct").dialog({
+						closed:false,
+						title:"数据展示"
+					});
+			    }
+			}); 
+			
+		}	
+	}
+</script>
+<style>
+	form#addProduct div {
+	    margin-top: 5px;
+	    margin-left: 20px;
+	}
+	.submit {
+    color: white;
+    font-weight: 900;
+    background: #486f9f;
+    margin-top: 10px;
+    margin-left: 440px;
+}
+	input.easyui-linkbutton.l-btn.l-btn-small {
+    font-size: 13px;
+    padding: 3px 5px;
+}
+#file {width: 254px;}
+	</style>
+</head>
+
+<body class="easyui-layout">
+
+	<!--多个点击按钮绑定同一个事件，根据按钮事件的状态进行相应的数据操作  -->
+	<select id="status" value="status" style="height: 22px;">
+		<option value="0">全部</option>
+		<option value="1">未开始</option>
+		<option value="2">进行中</option>
+		<option value="3">已结束</option>
+	</select>
+	
+	<!-- <input type="text" class="easyui-txtbox"  style="margin-left:20px;" placeholder="请输入名称" id="keywordName"> 
+				<td colspan="2"><button id="btnSearch">搜索</button></td> -->
+	<div id="editProduct">
+		<span id="newSpan">
+			<input type="button" onclick="editPro()" value="编辑"/>&nbsp;&nbsp;&nbsp;
+			<input type="button" onclick="deletePro()" value="删除"/>&nbsp;&nbsp;&nbsp;
+			<input type="button" onclick="addPro()" value="添加"/>
+		</span>
+		
+	</div>	<!--0 上架  1 下架 -->
+	<!--展示所有的商品信息  -->
+	<div style="width: 100%;height: 90%;overflow:auto;" id="newDiv" >
+		<table id="showAllAlert"></table>
+	</div>
+	
+	
+	<form method="post" id="addProduct" style="width: 800px;height: 600px;">
+		<table>
+			<tr>
+				<td>活动名称:</td><td><input type="text" name="name" style="width: 300px"   required="true"></td>
+			</tr>
+			<tr>
+				<td>弹窗图片地址</td>
+				<td><input id="picture" name="imgUrl" type="text" style="width: 300px"/></td>
+			</tr>
+			<tr>
+				<td>活动时间:</td>
+				<td>
+					<input class="easyui-datetimebox" id="ksDate" name="beginTime" data-options="required:true,showSeconds:false"
+	     				style="width:150px">
+					<input class="easyui-datetimebox" id="endDate" name="endTime" data-options="required:true,showSeconds:false"
+	     				style="width:150px">
+				</td>
+			</tr>
+			<tr>
+				<td>活动链接:</td><td><input type="text" name="detailsUrl" style="width: 300px"   required="true"></td>
+			</tr>
+			<tr><td colspan="3"><input type="button" value="提    交"    class="easyui-linkbutton  submit"  onclick="addProduct()"></td></tr>
+		</table>
+	</form>
+	<!--修改数据  -->
+	<form method="post" id="updateProduct" style="width: 800px;height: 600px;">
+		<table>
+			<tr>
+				<td><input type="hidden" name="alertId" id = "alertId" style="width: 300px"   required="true"></td>
+			</tr>
+			<tr>
+				<td>活动名称:</td><td><input type="text" name="name" id = "name" style="width: 300px"   required="true"></td>
+			</tr>
+			<tr>
+				<td>弹窗图片地址</td>
+				<td><input id="picture1" name="imgUrl" type="text" style="width: 300px"/></td>
+			</tr>
+			<tr>
+				<td>活动时间:</td>
+				<td>
+					<input class="easyui-datetimebox" id="beginTime" name="beginTime" data-options="required:true,showSeconds:false"
+	     				style="width:150px">
+					<input class="easyui-datetimebox" id="endTime" name="endTime" data-options="required:true,showSeconds:false"
+	     				style="width:150px">
+				</td>
+			</tr>
+			<tr>
+				<td>活动链接:</td><td><input type="text" id ="detailsUrl" name="detailsUrl" style="width: 300px"   required="true"></td>
+			</tr>
+			<tr><td colspan="3"><input type="button" value="提    交"    class="easyui-linkbutton  submit"  onclick="updateProduct()"></td></tr>
+		</table>
+	</form>
+	
+	<!--查看数据  -->
+	<form method="post" id="showProduct" style="width: 800px;height: 600px;">
+		<table>
+			<tr>
+				<td><input  name="alertId" type="hidden" id = "aId" style="width: 300px"   required="true"></td>
+			</tr>
+			<tr>
+				<td>活动名称:</td><td><input type="text" name="name" id = "aname" style="width: 300px"></td>
+			</tr>
+			<td>弹窗图片地址</td>
+			<td>
+				<input id="picture2" name="imgUrl" type="text" style="width: 300px"/>
+			</td>
+			</tr>
+			<tr>
+				<td>活动时间:</td>
+				<td>
+					<input type="text" id="aTime" name="beginTime" style="width:150px">
+					<input type="text" id="eTime" name="endTime" style="width:150px">
+				</td>
+			</tr>
+			<tr>
+				<td>活动链接:</td><td><input type="text" id ="details" name="detailsUrl" style="width: 300px"   required="true"></td>
+			</tr>
+		</table>
+	</form>
+	
+	
+	
+	
+</body>
+</html>

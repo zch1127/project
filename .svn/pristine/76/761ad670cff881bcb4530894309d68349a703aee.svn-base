@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.csbe.web.cms.information.mapper.NewsInformationMapper">
+
+	<!--分页查询所有的有效数据  -->
+	<select id="selectAllInformation" resultType="cn.csbe.web.cms.information.bean.NewsInformation">
+		select * from pub_news_information where status = 1 order by createTime desc limit #{page},#{rows}
+	</select>
+	<select id="selectCount" resultType="int">
+		select count(*) from pub_news_information where status = 1
+	</select>
+	<!-- 查询信息根据id -->
+	<select id="findById" resultType="cn.csbe.web.cms.information.bean.NewsInformation">
+		select * from pub_news_information where infoId = #{infoId}
+	</select>
+	<!--添加新闻资讯数据  -->
+	<insert id="addInformation">
+		insert into pub_news_information(infoName,infoContent,infoImg,htmlUrl,createTime,status,type,previewTotal)
+		values(#{infoName},#{infoContent},#{infoImg},#{htmlUrl},#{createTime},1,#{type},#{previewTotal})
+	</insert>
+	<!--伪删除  update  status = 0 -->
+	<update id="deleteInformation">
+		update pub_news_information set status = 0 where infoId in
+		<foreach collection="array" item="infoIdll" open="(" separator="," close=")">#{infoIdll}</foreach>
+	</update>
+	<!-- 修改  -->
+	<update id="updateInformation">
+		update pub_news_information set infoName = #{infoName},infoContent=#{infoContent},infoImg=#{infoImg},type = #{type},
+		createTime = #{createTime},previewTotal = #{previewTotal},htmlUrl=#{htmlUrl},status = #{status} where infoId = #{infoId}
+	</update>
+	
+	
+	
+	
+</mapper>

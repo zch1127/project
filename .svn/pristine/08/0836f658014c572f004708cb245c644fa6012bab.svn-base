@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.csbe.web.cms.activityalert.mapper.ActivityAlertMapper">
+	
+	<!--查询数据  -->	
+	<select id="selectAllAlert" resultType="cn.csbe.web.cms.activityalert.bean.ActivityAlert">
+		select * from pub_activity_alert where status = 1 order by createTime desc LIMIT #{page},#{rows}
+	</select>
+	<select id="selectCount" resultType="int">
+		select count(1) from pub_activity_alert where status = 1
+	</select>
+	
+	<!--未开始  -->	
+	<select id="selectAllAlertByStatus" resultType="cn.csbe.web.cms.activityalert.bean.ActivityAlert">
+		select * from pub_activity_alert where status =1 and beginTime > #{dateTimeStr} order by createTime desc
+			LIMIT #{page},#{rows}
+	</select>
+	<select id="selectCountByStatus" resultType="int">
+		select count(1) from pub_activity_alert 
+			where status =1 and #{dateTimeStr} > beginTime
+	</select>
+	<!-- 进行中 -->
+	<select id="selectAlertOngoing" resultType="cn.csbe.web.cms.activityalert.bean.ActivityAlert">
+		select * from pub_activity_alert where status =1 and #{dateTimeStr} > beginTime and endTime > #{dateTimeStr} order by createTime desc
+			LIMIT #{page},#{rows}
+	</select>
+	<select id="selectCountOngoing" resultType="int">
+		select count(1) from pub_activity_alert 
+			where status =1 and #{dateTimeStr} > beginTime and endTime > #{dateTimeStr}
+	</select>
+	<!--已结束  -->
+	<select id="selectAllFinishedAlert" resultType="cn.csbe.web.cms.activityalert.bean.ActivityAlert">
+		select * from pub_activity_alert where status =1 and #{dateTimeStr} > endTime order by createTime desc
+			LIMIT #{page},#{rows}
+	</select>
+	<select id="selectFinishedCount" resultType="int">
+		select count(1) from pub_activity_alert 
+			where status =1 and #{dateTimeStr} > endTime
+	</select>
+	
+	<!--add  -->
+	<insert id="addAlert">
+		insert into pub_activity_alert
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="name != null">
+				name,
+			</if>
+			<if test="beginTime != null">
+				beginTime,
+			</if>
+			<if test="endTime != null">
+				endTime,
+			</if>
+			<if test="detailsUrl != null">
+				detailsUrl,
+			</if>
+			<if test="createTime != null">
+				createTime,
+			</if>
+			<if test="status != null">
+				status,
+			</if>
+			<if test="imgUrl != null">
+				imgUrl,
+			</if>
+		</trim>
+		
+		<trim prefix="values(" suffix=")" suffixOverrides=",">
+			<if test="name != null">
+				#{name},
+			</if>
+			<if test="beginTime != null">
+				#{beginTime},
+			</if>
+			<if test="endTime != null">
+				#{endTime},
+			</if>
+			<if test="detailsUrl != null">
+				#{detailsUrl},
+			</if>
+			<if test="createTime != null">
+				#{createTime},
+			</if>
+			<if test="status != null">
+				#{status},
+			</if>
+			<if test="imgUrl != null">
+				#{imgUrl},
+			</if>
+		</trim>
+	
+	</insert>
+	<!--update  -->
+	<update id="updateAlert">
+		update pub_activity_alert set name = #{name},beginTime = #{beginTime},endTime = #{endTime},
+				detailsUrl = #{detailsUrl},imgUrl = #{imgUrl} where alertId = #{alertId}
+	</update>
+	
+	<!--删除  -->
+	<update id="deleteManyAlertActivity">
+		update pub_activity_alert set status = 0 where alertId in
+		<foreach collection="array" item="alertIdll" open="(" close=")" separator=",">
+			#{alertIdll}
+		</foreach>
+	</update>
+	
+	
+	
+	
+</mapper>

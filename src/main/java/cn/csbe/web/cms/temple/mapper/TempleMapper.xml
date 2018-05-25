@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.csbe.web.cms.temple.mapper.TempleMapper">
+	
+
+	<!--查询  -->
+	<select id="selectTempleByAbbotId" resultType="cn.csbe.web.cms.temple.bean.Temple">
+		select * from pub_temple where status = 1 and abbotId=#{id}
+	</select>
+	<!--查询全部  分页-->
+	<select id="selectAllTemple" resultType="cn.csbe.web.cms.temple.bean.Temple">
+		select * from pub_temple where status = 1 limit #{page},#{rows}
+	</select>
+	<!--query total  -->
+	<select id="selectCount" resultType="int">
+		select count(*) from pub_temple where status = 1
+	</select>
+	<!--批量删除  逻辑删除  -->
+	<update id="deleteTemple">
+		update pub_temple set status = 0 where templeId in
+		<foreach collection="array" item="idll" open="(" close=")" 
+		separator=",">#{idll}</foreach>
+	</update>
+	<!--添加数据  -->
+	<insert id="addTemple">
+		insert into pub_temple
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="templeId !=null">
+				templeId,
+			</if>
+			<if test="templeName !=null">
+				templeName,
+			</if>
+			<if test="imgUrl !=null">
+				imgUrl,
+			</if>
+			<if test="createTime !=null">
+				createTime,
+			</if>
+			<if test="updateTime !=null">
+				updateTime,
+			</if>
+			<if test="content !=null">
+				content,
+			</if>
+			<if test="address !=null">
+				address,
+			</if>
+			<if test="status !=null">
+				status,
+			</if>
+			<if test="abbotId !=null">
+				abbotId,
+			</if>
+			<if test="cardUrl !=null">
+				cardUrl,
+			</if>
+		</trim>
+		<trim prefix="values(" suffix=")" suffixOverrides=",">
+			<if test="templeId !=null">
+				#{templeId},
+			</if>
+			<if test="templeName !=null">
+				#{templeName},
+			</if>
+			<if test="imgUrl !=null">
+				#{imgUrl},
+			</if>
+			<if test="createTime !=null">
+				#{createTime},
+			</if>
+			<if test="updateTime !=null">
+				#{updateTime},
+			</if>
+			<if test="content !=null">
+				#{content},
+			</if>
+			<if test="address !=null">
+				#{address},
+			</if>
+			<if test="status !=null">
+				#{status},
+			</if>
+			<if test="abbotId !=null">
+				#{abbotId},
+			</if>
+			<if test="cardUrl !=null">
+				#{cardUrl},
+			</if>
+		</trim>
+	</insert>
+	<!--根据ID查询  -->
+	<select id="selectTempleById" resultType="cn.csbe.web.cms.temple.bean.Temple">
+		select * from pub_temple where templeId=#{templeId}
+	</select>
+	<!-- 查询全部 -->
+	<select id="queryAllTemple" resultType="cn.csbe.web.cms.temple.bean.Temple">
+		select * from pub_temple where status = 1
+	</select>
+	<!--修改  -->
+	<update id="updateTemple">
+		update pub_temple 
+		<set>
+			<if test="templeName !=null">
+				templeName=#{templeName},
+			</if>
+			<if test="imgUrl !=null">
+				imgUrl=#{imgUrl},
+			</if>
+			<if test="createTime !=null">
+				createTime=#{createTime},
+			</if>
+			<if test="updateTime !=null">
+				updateTime=#{updateTime},
+			</if>
+			<if test="content !=null">
+				content=#{content},
+			</if>
+			<if test="address !=null">
+				address=#{address},
+			</if>
+			<if test="status !=null">
+				status=#{status},
+			</if>
+			<if test="abbotId !=null">
+				abbotId=#{abbotId},
+			</if>
+			<if test="cardUrl !=null">
+				cardUrl=#{cardUrl},
+			</if>
+		</set>
+		where templeId = #{templeId}
+	</update>
+</mapper>

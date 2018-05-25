@@ -1,0 +1,281 @@
+package cn.csbe.web.cms.temple.controller;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.commons.CommonsMultipartFile;
+import org.springframework.web.servlet.ModelAndView;
+
+import cn.csbe.web.cms.auth.bean.UserPassword;
+import cn.csbe.web.cms.common.CSBE;
+import cn.csbe.web.cms.common.DateUtils;
+import cn.csbe.web.cms.common.Result;
+import cn.csbe.web.cms.common.UploadResult;
+import cn.csbe.web.cms.common.UploadUtils;
+import cn.csbe.web.cms.common.constantUtils;
+import cn.csbe.web.cms.common.bean.Message;
+import cn.csbe.web.cms.temple.bean.Abbot;
+import cn.csbe.web.cms.temple.bean.Temple;
+import cn.csbe.web.cms.temple.bean.TempleMode;
+import cn.csbe.web.cms.temple.bean.TemplePalace;
+import cn.csbe.web.cms.temple.service.AbbotService;
+import cn.csbe.web.cms.temple.service.TempleModeService;
+import cn.csbe.web.cms.temple.service.TemplePalaceService;
+import cn.csbe.web.cms.temple.service.TempleService;
+
+/**
+ * 寺院 住持
+ * @author sxzhang
+ *
+ */
+@Controller
+@RequestMapping("/temple")
+public class TempleController {
+	@Autowired
+	private AbbotService abbotService;
+	@Autowired
+	private TempleService templeService;
+	@Autowired
+	private TempleModeService templeModeService;
+	@Autowired
+	private TemplePalaceService palaceService;
+	/**
+	 * 跳转到展示所有的寺院信息页面
+	 * toShowTemple
+	 */
+	@RequestMapping("/toShowTemple")
+	public Object toShowTemple(){
+		return "/temple/temple";
+	}
+	/**
+	 * 跳转到寺院关系模块
+	 * toShowAllRelation
+	 */
+	@RequestMapping("/toShowAllRelation")
+	public Object toShowAllRelation(){
+		return "/temple/showAllRelation";
+	}
+	/**
+	 * 跳转到宫殿管理模块
+	 */
+	@RequestMapping("toPalace")
+	public Object toPalace(){
+		return "/temple/palace";
+	}
+	/**
+	 * 展示所有住持信息
+	 * selectAbbot
+	 */
+	@RequestMapping("/selectAbbot")
+	@ResponseBody
+	public List<Abbot> selectAbbot(){
+		List<Abbot> list = new ArrayList<Abbot>();
+		list = abbotService.selectAbbot();
+		return list;
+	}
+	/**
+	 * 展示住持信息ById
+	 * @return 
+	 */
+	@RequestMapping("/selectAbbotById")
+	@ResponseBody
+	public Map<String,Object> selectAbbotById(Integer abbotId){
+		Map<String,Object> map = new HashMap<String,Object>();
+		map = abbotService.selectAbbotById(abbotId);
+		return map;
+	}
+	/**
+	 * 分页展示所有寺院信息 
+	 * selectAllTemple
+	 */
+	@RequestMapping("/selectAllTemple")
+	@ResponseBody
+	public Map<String,Object> selectAllTemple(Integer page,Integer rows){
+		Map<String,Object> map = new HashMap<String,Object>();
+		map = templeService.selectAllTemple(page,rows);
+		return map;
+	}
+	/**
+	 * 展示所有寺院信息 
+	 * queryAllTemple
+	 */
+	@RequestMapping("/queryAllTemple")
+	@ResponseBody
+	public List<Temple> queryAllTemple(){
+		List<Temple> list = templeService.queryAllTemple();
+		return list;
+	}
+	
+	/**
+	 * 根据住持id 查询所属寺院信息
+	 * selectTemple
+	 */
+	@RequestMapping("/selectTemple")
+	@ResponseBody
+	public List<Temple> selectTemple(Integer id){
+		List<Temple> list = new ArrayList<Temple>();
+		list = templeService.selectTempleByAbbotId(id);
+		return list;
+	}
+	/**
+	 * 根据寺院id 查询寺院信息
+	 * selectTempleById
+	 */
+	@RequestMapping("/selectTempleById")
+	@ResponseBody
+	public Map<String,Object> selectTempleById(Integer templeId){
+		Map<String,Object> map = new HashMap<String,Object>();
+		map = templeService.selectTempleById(templeId);
+		return map;
+	}
+	/**
+	 * 修改寺院信息  跳转到修改寺院页面
+	 * queryTempleById
+	 */
+	@RequestMapping("/queryTempleById")
+	@ResponseBody
+	public ModelAndView queryTempleById(Integer templeId){
+		ModelAndView model = new ModelAndView();
+		Map<String,Object> map = new HashMap<String,Object>();
+		map = templeService.selectTempleById(templeId);
+		model.setViewName("temple/updateTemple");
+		model.addObject("temple", map.get("temple"));
+		return model;
+	}
+	/**
+	 * 批量删除 deleteTemple
+	 * @param ids
+	 * @return
+	 */
+	@RequestMapping("/deleteTemple")
+	@ResponseBody
+	public boolean deleteTemple(Integer[] ids){
+		boolean isDelete = templeService.deleteTemple(ids);
+		return isDelete;
+	}
+	
+	/**
+	 * 添加寺院信息
+	 * addTemple
+	 * @return 
+	 * @Param temple
+	 */
+	@RequestMapping("/temple")
+	@ResponseBody
+	public boolean addTemple(Temple temple){
+		temple.setStatus(1);
+		temple.setCreateTime(DateUtils.getDateTimeStr(new Date(),"yyyy-MM-dd HH:mm:ss"));
+		boolean isAdd = templeService.addTemple(temple);
+		return isAdd;
+	}
+	/**
+	 * 修改寺院信息
+	 * updateTemple
+	 * @return
+	 */
+	@RequestMapping("/updateTemple")
+	@ResponseBody
+	public boolean updateTemple(Temple temple){
+		temple.setUpdateTime(DateUtils.getDateTimeStr(new Date(),"yyyy-MM-dd HH:mm:ss"));
+		boolean isUpdate = templeService.updateTemple(temple);
+		return isUpdate;
+	}
+	/**
+	 * 查询所有的寺院关系
+	 * 
+	 */
+	@RequestMapping("/selectAllRelation")
+	@ResponseBody
+	public Map<String,Object> selectAllRelation(Integer page,Integer rows){
+		Map<String,Object> map = new HashMap<String,Object>();
+		map = templeModeService.selectAllRelation(page,rows);
+		return map;
+	}
+	/**
+	 * 添加寺院模块关系信息
+	 * addTempleRelation
+	 * templeMode
+	 */
+	@RequestMapping("/addTempleRelation")
+	@ResponseBody
+	public boolean addTempleRelation(TempleMode templeMode){
+		boolean isAdd = templeModeService.addTempleRelation(templeMode);
+		return isAdd;
+	}
+	/**
+	 * 查询全部宫殿信息
+	 * selectAllPalace
+	 */
+	@RequestMapping("/selectAllPalace")
+	@ResponseBody
+	public Map<String,Object> selectAllPalace(Integer page,Integer rows){
+		Map<String,Object> map = new HashMap<String,Object>();
+		map = palaceService.selectAllPalace(page,rows);
+		return map;
+	}
+	/**
+	 * 批量删除 deletePalace
+	 * @param ids
+	 * @return
+	 */
+	@RequestMapping("/deletePalace")
+	@ResponseBody
+	public boolean deletePalace(Integer[] ids){
+		boolean isDelete = palaceService.deletePalace(ids);
+		return isDelete;
+	}
+	
+	/**
+	 * 添加寺院宫殿信息
+	 * addTemplePalace
+	 * @return 
+	 * @Param temple
+	 */
+	@RequestMapping("/addTemplePalace")
+	@ResponseBody
+	public boolean addTemplePalace(TemplePalace palace){
+		boolean isAdd = palaceService.addTemplePalace(palace);
+		return isAdd;
+	}
+	/**
+	 * 修改寺院宫殿信息
+	 * updateTemple
+	 * @return
+	 */
+	@RequestMapping("/updateTemplePalace")
+	@ResponseBody
+	public boolean updateTemplePalace(TemplePalace palace){
+		TemplePalace tp = palaceService.queryPalaceByPid(palace.getPalaceId());
+		boolean isUpdate = palaceService.updateTemplePalace(palace);
+		return isUpdate;
+	}
+	
+	/**
+	 * 图片上传
+	 */
+	@RequestMapping(value = "upload/pictrue", method = RequestMethod.POST)
+	@ResponseBody
+	private Object uploadfile(@RequestParam("upfile") CommonsMultipartFile mFile, HttpServletRequest request,
+			HttpServletResponse response, UserPassword userPassword) throws Exception {
+
+		UploadResult uploadResult = UploadUtils.upload(request, mFile,constantUtils.TEMPLE_IMG);
+
+		if (uploadResult == null || uploadResult.getStatus() != CSBE.OK) {
+			return new Message(false, "不合法的文件类型");
+		}
+		return CSBE.encryption(new Result(CSBE.OK, "上传成功", uploadResult.getValue()));
+	}
+
+}

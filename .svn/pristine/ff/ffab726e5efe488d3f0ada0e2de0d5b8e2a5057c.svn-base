@@ -1,0 +1,45 @@
+#imgserver=http\://localhost\:8088/buddha-bms/
+#fileserver=http\://localhost\:8088/buddha-bms/
+imgserver=http\://60.205.152.224\:8091/buddha-bms/
+fileserver=http\://60.205.152.224\:8091/buddha-bms/
+
+uploadPath=/
+
+#theme ueditor img option  
+ueditorImg=C:/projectRain/apiTomcat/webapps/buddha-img/upload/news
+#ueditorImg=C:/projectRain/imgService/upload/news
+#ueditorImg=D:/apache-tomcat-7.0.75/webapps/buddha-img/upload/news
+
+#fangwen url
+
+addlocalStr=http://60.205.152.224:8091/buddha-bms/ueditor//C:/projectRain/apiTomcat/webapps/buddha-img/
+localStr=http://60.205.152.224:8091/buddha-bms//ueditor//C:/projectRain/apiTomcat/webapps/buddha-img/
+#html img replace url
+#addlocalStr=http\://60.205.152.224\:8091/buddha-bms/ueditor//C\:/projectRain/imgService
+#localStr=http\://60.205.152.224\:8091/buddha-bms//ueditor//C\:/projectRain/imgService
+#html page nei img
+imgHtmlPath=http\://60.205.152.224\:8091/buddha-img/
+
+htmlPath=http\://60.205.152.224\:8091/buddha-img/
+
+themeImg=images/theme
+wallImg=images/wallpager
+buddhaImg=images/buddha
+offeringsImg=images/offerings
+newImg=images/news
+productImg=images/product
+productTitleImg=images/product/title
+templeImg =images/temple
+alertImg =images/alert
+#tuisong
+noticeImg = images/notice
+#tuisongdizhi
+noticeUrl=http\://60.205.152.224\:8091/buddha-api/push/systemdaily
+payNoticeUrl=http://60.205.152.224:8091/buddha-api/push/muluser
+
+#wuliu
+WULIUURL = https://www.baoyoubaoyou.cn/buddha-api/logistics/record
+#WULIUURL = http://localhost:8091/buddha-api/logistics/record
+
+noticeIcon=user/list_icon_interactivity@2x.png
+logisticsleftIcon=user/list_icon_logistics@2x.png

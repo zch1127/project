@@ -1,0 +1,53 @@
+package cn.csbe.web.cms.information.service.impl;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import cn.csbe.web.cms.information.bean.NewsInformation;
+import cn.csbe.web.cms.information.mapper.NewsInformationMapper;
+import cn.csbe.web.cms.information.service.NewsInformationService;
+@Service
+public class NewsInformationServiceImpl implements NewsInformationService {
+	@Autowired
+	private NewsInformationMapper newsInformationMapper;
+	@Override
+	public Map<String, Object> selectAllInformation(Integer page, Integer rows) {
+		Map<String, Object> map = new HashMap<String, Object>();
+		page = (page-1)*rows;
+		List<NewsInformation> list = newsInformationMapper.selectAllInformation(page,rows);
+		int total = newsInformationMapper.selectCount();
+		map.put("rows", list);
+		map.put("total", total);
+		return map;
+	}
+	@Override
+	public boolean addInformation(NewsInformation newsInformation) {
+		
+		return newsInformationMapper.addInformation(newsInformation);
+	}
+	@Override
+	public boolean deleteInformation(Integer[] infoId) {
+		// TODO Auto-generated method stub
+		return newsInformationMapper.deleteInformation(infoId);
+	}
+	@Override
+	public boolean updateInformation(NewsInformation newsInformation) {
+		// TODO Auto-generated method stub
+		return newsInformationMapper.updateInformation(newsInformation);
+	}
+	@Override
+	public NewsInformation findById(Integer infoId) {
+		// TODO Auto-generated method stub
+		return newsInformationMapper.findById(infoId);
+	}
+	@Override
+	public NewsInformation queryBigPreviewTotal(Integer type) {
+		// TODO Auto-generated method stub
+		return newsInformationMapper.queryBigPreviewTotal(type);
+	}
+
+}

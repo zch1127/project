@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.csbe.web.cms.product.mapper.ProductMapper">
+	
+	<!-- 添加数据 -->
+	<insert id="insert">
+		insert into ds_product_info(name,isPacking,packPrice,freightPrice,costPrice,sellPrice,originalPrice,profitPrice,
+		productImgJson,productTypeId,productCategoryId,areaAddress,userId,createDate,isRecommend,isFreight,titleImg,productDetailImgJson,quantityNumber,isShelves,abbotId,templeId,code) 
+		values(#{name},#{isPacking},#{packPrice},#{freightPrice},#{costPrice},#{sellPrice},#{originalPrice},#{profitPrice},
+		#{productImgJson},#{productTypeId},#{productCategoryId},#{areaAddress},#{userId},#{createDate},#{isRecommend},#{isFreight},#{titleImg},#{productDetailImgJson},#{quantityNumber},1,#{abbotId},#{templeId},#{code}) 
+	</insert>
+	<!--分页查询出所有数据进行展示 根据上架状态进行查询  出售中的商品  库存部位0-->
+	<select id="selectAllProduct" resultType="cn.csbe.web.cms.product.bean.Product">
+		select * from ds_product_info where isShelves =1 and enableStatus = 1 and quantityNumber !=0 order by createDate desc limit #{page},#{rows}	
+	</select>
+	<!--上架数量  -->
+	<select id="selectCount" resultType="int">
+		select count(1) from ds_product_info where isShelves =1 and enableStatus = 1 and quantityNumber !=0
+	</select>
+	
+	<!-- 根据名字进行数据的查询 -->	
+	<select id="searchProduct" resultType="cn.csbe.web.cms.product.bean.Product">
+		select * from ds_product_info where name like CONCAT('%',#{name},'%') and enableStatus = 1
+		order by createDate desc limit #{page},#{rows}	
+	</select>	
+	<!--搜索的商品的数量  -->
+	<select id="selectCountByName" resultType="int">
+		select count(1) from ds_product_info where name like CONCAT('%',#{name},'%') and enableStatus = 1
+	</select>
+	<!--推荐  -->
+	<select id="selectProductByRecommend" resultType="cn.csbe.web.cms.product.bean.Product">
+		select * from ds_product_info where isRecommend = '1' and enableStatus = 1 and quantityNumber !=0
+		order by createDate desc limit #{page},#{rows}
+	</select>
+	<!--数量  -->
+	<select id="selectCountBR" resultType="int">
+		select count(1) from ds_product_info where isRecommend = '1' and enableStatus = 1 and quantityNumber !=0
+	</select>
+	
+	<!--销售完  -->
+	<select id="selectProductByquantityNumber" resultType="cn.csbe.web.cms.product.bean.Product">
+		select * from ds_product_info where quantityNumber =0 and enableStatus = 1
+		order by createDate desc limit #{page},#{rows}
+	</select>
+	<!--数量  -->
+	<select id="selectCountByQN" resultType="int">
+		select count(1) from ds_product_info where quantityNumber = 0 and enableStatus = 1
+	</select>
+	<!--仓库  -->
+	<select id="selectProductInCk" resultType="cn.csbe.web.cms.product.bean.Product">
+		select * from ds_product_info where isShelves =0 and enableStatus = 1 and quantityNumber !=0
+		order by createDate desc limit #{page},#{rows}
+	</select>
+	<!--数量  -->
+	<select id="selectCountInCk" resultType="int">
+		select count(1) from ds_product_info where isShelves= 0 and enableStatus = 1 and quantityNumber !=0
+	</select>
+	
+	<!--批量删除  -->
+	<update id="delete">
+		update ds_product_info set enableStatus=0 where id in 
+		<foreach collection="array" item="idll" open="(" close=")" 
+		separator=",">#{idll}</foreach>
+	</update>
+	<!--下架  把isShelves设置为0 -->
+	<update id="updatePro">
+		update ds_product_info set isShelves=0 where id in 
+		<foreach collection="array" item="idll" open="(" close=")" 
+		separator=",">#{idll}</foreach>
+	</update>
+	<!--上架 shelvesProduct -->
+	<update id="shelvesProduct">
+		update ds_product_info set isShelves=1 where id in 
+		<foreach collection="array" item="idll" open="(" close=")" 
+		separator=",">#{idll}</foreach>
+	</update>
+	<!--批量取消推荐  updateProByRecommend-->
+	<update id="updateProByRecommend">
+		update ds_product_info set isRecommend =0 where id in 
+		<foreach collection="array" item="idll" open="(" close=")" 
+		separator=",">#{idll}</foreach>
+	</update>
+	<!--查询id  -->
+	<select id="selectNewId" resultType="int">
+		select id from ds_product_info order by createDate desc limit 0,1
+	</select>
+	<!--根据ID进行查询  -->
+	<select id="selectById" resultType="cn.csbe.web.cms.product.bean.Product">
+		select * from ds_product_info  where id =#{id}
+	</select>
+	<!--编辑  update   -->
+	<update id="updateProduct">
+		update ds_product_info set name=#{name},isPacking=#{isPacking},packPrice=#{packPrice},freightPrice=#{freightPrice},costPrice=#{costPrice},sellPrice=#{sellPrice},originalPrice=#{originalPrice},profitPrice=#{profitPrice},
+		productImgJson =#{productImgJson},productTypeId=#{productTypeId},productCategoryId=#{productCategoryId},modifyDate=sysDate(),isRecommend=#{isRecommend},isFreight=#{isFreight},titleImg=#{titleImg},productDetailImgJson=#{productDetailImgJson},quantityNumber=#{quantityNumber},
+		abbotId = #{abbotId},templeId = #{templeId},code=#{code}
+		where id=#{id}
+	</update>
+	
+	
+</mapper>

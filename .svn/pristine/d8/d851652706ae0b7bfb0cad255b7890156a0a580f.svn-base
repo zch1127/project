@@ -1,0 +1,136 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.csbe.web.cms.activities.mapper.CouponMapper">
+	
+	
+	<!-- 查询全部 -->
+	<select id="showAllCoupon" resultType="cn.csbe.web.cms.activities.bean.Coupon">
+		select * from ds_activity_coupon where status=1 order by createDate desc
+	</select>
+	<!-- 根据活动状态查询活动内容 -->
+	<select id="showAllCouponByStatus" resultType="cn.csbe.web.cms.activities.bean.Coupon">
+		select * from ds_activity_coupon where activityStatus=#{activityStatus}  and status=1 order by createDate desc
+	</select>
+	<!-- 添加优惠券 -->
+	<insert id="addCoupon">
+		insert into ds_activity_coupon
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="couponName !=null">
+				couponName,
+			</if>
+			<if test="startTime !=null">
+				startTime,
+			</if>
+			<if test="endTime !=null">
+				endTime,
+			</if>
+			<if test="faceValue !=null">
+				faceValue,
+			</if>
+			<if test="usingThreshold !=null">
+				usingThreshold,
+			</if>
+			<if test="fullAmountReduction !=null">
+				fullAmountReduction,
+			</if>
+			<if test="receiveNum !=null">
+				receiveNum,
+			</if>
+			<if test="useNum !=null">
+				useNum,
+			</if>
+			<if test="grantNum !=null">
+				grantNum,
+			</if>
+			<if test="status !=null">
+				status,
+			</if>
+			<if test="activityStatus !=null">
+				activityStatus,
+			</if>
+			<if test="limitNum !=null">
+				limitNum,	
+			</if>
+			<if test="remind !=null">
+				remind,
+			</if>
+			<if test="userType !=null">
+				userType,	
+			</if>
+			<if test="createDate !=null">
+				createDate,	
+			</if>
+		</trim>
+		<trim prefix="values(" suffix=")" suffixOverrides=",">
+			<if test="couponName !=null">
+				#{couponName},
+			</if>
+			<if test="startTime !=null">
+				#{startTime},
+			</if>
+			<if test="endTime !=null">
+				#{endTime},
+			</if>
+			<if test="faceValue !=null">
+				#{faceValue},
+			</if>
+			<if test="usingThreshold !=null">
+				#{usingThreshold},
+			</if>
+			<if test="fullAmountReduction !=null">
+				#{fullAmountReduction},
+			</if>
+			<if test="receiveNum !=null">
+				#{receiveNum},
+			</if>
+			<if test="useNum !=null">
+				#{useNum},
+			</if>
+			<if test="grantNum !=null">
+				#{grantNum},
+			</if>
+			<if test="status !=null">
+				#{status},
+			</if>
+			<if test="activityStatus !=null">
+				#{activityStatus},
+			</if>
+			<if test="limitNum !=null">
+				#{limitNum},	
+			</if>
+			<if test="remind !=null">
+				#{remind},
+			</if>
+			<if test="userType !=null">
+				#{userType},	
+			</if>
+			<if test="createDate !=null">
+				#{createDate},	
+			</if>
+		</trim>
+	</insert>
+	
+	<!-- 根据id查找红包 -->
+	<select id="selectById" resultType="cn.csbe.web.cms.activities.bean.Coupon">
+		select * from ds_activity_coupon where id = #{id}
+	</select>
+	<!-- 编辑红包 -->
+	<update id="updateCoupon">
+		update ds_activity_coupon set couponName=#{couponName},startTime=#{startTime},endTime=#{endTime},faceValue=#{faceValue},
+		grantNum=#{grantNum},usingThreshold=#{usingThreshold},fullAmountReduction=#{fullAmountReduction},remind=#{remind} where id=#{id}
+	</update>
+	
+	<!-- 删除红包修改显示状态字段 -->
+	<update id="deleteCoupon">
+		update ds_activity_coupon set status=0 where id=#{id} 
+	</update>
+	
+	<!-- 查询所有活动定时更新状态 -->
+	<select id="selectStartEndDate">
+		select * from ds_activity_coupon where status = 1
+	</select>
+	<update id="changeCouponActivityStatus">
+		update ds_activity_coupon set activityStatus=#{activityStatus} where id=#{id}
+	</update>
+	
+</mapper>

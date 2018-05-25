@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.csbe.web.cms.push.mapper.PubNoticeMapper">
+	
+
+	
+	<!--查询系统通知  分页-->
+	<select id="queryAllPush" resultType="cn.csbe.web.cms.push.bean.PubNotice">
+		select * from pub_notice where status = 1 and type=0 order by createDate desc limit #{page},#{rows}
+	</select>
+	<!-- 查询数量 -->
+	<select id="queryCount" resultType="int">
+		select count(1) from pub_notice where status = 1 and type=0
+	</select>
+	
+	<!-- 查询byId -->
+	<select id="findById" resultType="cn.csbe.web.cms.push.bean.PubNotice">
+		select * from pub_notice where noticeId = #{noticeId}
+	</select>
+	
+	<insert id="addNotice">
+		insert into pub_notice 
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="noticeId !=null">
+				noticeId,
+			</if>
+			<if test="title !=null">
+				title,
+			</if>
+			
+			<if test="spareField !=null">
+				spareField,
+			</if>
+			<if test="introduction !=null">
+				introduction,
+			</if>
+			<if test="htmlUrl !=null">
+				htmlUrl,
+			</if>
+			<if test="twoType !=null">
+				twoType,
+			</if>
+			<if test="picture !=null">
+				picture,
+			</if>
+			<if test="createDate !=null">
+				createDate,
+			</if>
+			<if test="leftIcon !=null">
+				leftIcon,
+			</if>
+			<if test="infoType !=null">
+				infoType,
+			</if>
+			<if test="templeId !=null">
+				templeId,
+			</if>
+			<if test="payNoticeDetailTitle !=null">
+				payNoticeDetailTitle,
+			</if>
+		</trim>
+		<trim prefix="values(" suffix=")" suffixOverrides=",">
+			<if test="noticeId !=null">
+				#{noticeId},
+			</if>
+			<if test="title !=null">
+				#{title},
+			</if>
+			<if test="spareField !=null">
+				#{spareField},
+			</if>
+			<if test="introduction !=null">
+				#{introduction},
+			</if>
+			<if test="htmlUrl !=null">
+				#{htmlUrl},
+			</if>
+			<if test="twoType !=null">
+				#{twoType},
+			</if>
+			<if test="picture !=null">
+				#{picture},
+			</if>
+			<if test="createDate !=null">
+				#{createDate},
+			</if>
+			<if test="leftIcon !=null">
+				#{leftIcon},
+			</if>
+			<if test="infoType !=null">
+				#{infoType},
+			</if>
+			<if test="templeId !=null">
+				#{templeId},
+			</if>
+			<if test="payNoticeDetailTitle !=null">
+				#{payNoticeDetailTitle},
+			</if>
+		</trim>
+	</insert>
+	
+	<!--伪删除  -->
+	<update id="deleteNotice">
+		update pub_notice set status = 0 where noticeId in
+		<foreach collection="array" item="noticeIdll" open="(" close=")" separator=",">
+			#{noticeIdll}
+		</foreach>
+	</update>
+	<!--修改数据  -->
+	<update id="editNotice">
+		update pub_notice set title =#{title},introduction = #{introduction},htmlUrl = #{htmlUrl},twoType = #{twoType},
+		createDate = #{createDate},modifyDate = #{modifyDate} where noticeId = #{noticeId}
+	</update>
+	<!--查询所有用户数据  -->
+	<select id="queryAllUser" resultType="cn.csbe.web.cms.push.bean.PubUser">
+		select userId from pub_user
+	</select>
+	<!-- 查询规定时间内的系统通知(含固定、活动通知) -->
+	<select id="queryByTime" resultType="cn.csbe.web.cms.push.bean.PubNotice">
+		select * from pub_notice where (status = 1 and type = 0 and substr(createDate,1,16) =#{time} and twoType=1)  or (status = 1 and type = 0 and substr(createDate,1,16) =#{time} and twoType=2)
+	</select> 
+	
+	<!--查询所有付费消息*  -->
+	<select id="queryByTwoType" resultType="cn.csbe.web.cms.push.bean.PubNotice" >
+		select * from pub_notice where twoType=#{twoType} and status =1
+	</select> 
+	
+	
+</mapper>

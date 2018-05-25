@@ -1,0 +1,33 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.csbe.web.cms.activities.mapper.CouponReceiveMapper">
+	
+	
+	<!-- 查询已使用优惠券 -->
+	<select id="selectAllCouponReceive" resultType="cn.csbe.web.cms.activities.bean.CouponReceive">
+		select a.*,c.userName,b.activityStatus,b.`status` from ds_activity_coupon_receive a LEFT JOIN ds_activity_coupon b
+			on a.couponId = b.id LEFT JOIN pub_user c on a.userId= c.userId
+		 where useStatus=1 and activityStatus=#{activityStatus} and b.`status`=1  and couponId=#{couponId} limit #{start} ,#{rows}
+	</select>
+	<!-- 查询总条数 -->
+	<select id="countAllCouponReceive" resultType="int">
+		select count(*) from ds_activity_coupon_receive a LEFT JOIN ds_activity_coupon b
+			on a.couponId = b.id where useStatus=1 and activityStatus=#{activityStatus} and status=1 and couponId=#{couponId}
+	</select>
+	<!-- 活动失效时修改领取未使用优惠券为失效状态 -->
+	<update id="changeCouponReceiveUseStatus">
+		update ds_activity_coupon_receive set useStatus=2 where couponId=#{couponId} and status=1
+	</update>
+	
+	<!-- 查询优惠券领取总数 -->
+	<select id="countAllCouponReceiveById" resultType="int">
+		select count(*) from ds_activity_coupon_receive where  couponId=#{couponId}
+	</select>
+	<!--添加用户优惠券信息  -->
+	<insert id="add">
+		insert into ds_activity_coupon_receive(userId,receivedTime,useStatus,couponId)
+			values(#{userId},#{receivedTime},#{useStatus},#{couponId})
+	</insert>
+	
+	
+</mapper>

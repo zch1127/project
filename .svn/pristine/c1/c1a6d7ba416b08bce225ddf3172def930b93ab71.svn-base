@@ -1,0 +1,85 @@
+package cn.csbe.web.cms.temple.bean;
+
+import java.io.Serializable;
+
+/**
+ * 寺院表
+ * @author sxzhang
+ *
+ */
+
+public class Temple implements Serializable{
+	private Integer templeId;
+	private String templeName;
+	private String imgUrl;
+	private String createTime;
+	private String updateTime;
+	private String content;
+	private String address;
+	private Integer status;
+	private String backgroundImgUrl;
+	private Integer abbotId;
+	public Integer getTempleId() {
+		return templeId;
+	}
+	public void setTempleId(Integer templeId) {
+		this.templeId = templeId;
+	}
+	public String getTempleName() {
+		return templeName;
+	}
+	public void setTempleName(String templeName) {
+		this.templeName = templeName;
+	}
+	public String getImgUrl() {
+		return imgUrl;
+	}
+	public void setImgUrl(String imgUrl) {
+		this.imgUrl = imgUrl;
+	}
+	public String getCreateTime() {
+		return createTime;
+	}
+	public void setCreateTime(String createTime) {
+		this.createTime = createTime;
+	}
+	public String getupdateTime() {
+		return updateTime;
+	}
+	public void setupdateTime(String updateTime) {
+		this.updateTime = updateTime;
+	}
+	public String getContent() {
+		return content;
+	}
+	public void setContent(String content) {
+		this.content = content;
+	}
+	public String getAddress() {
+		return address;
+	}
+	public void setAddress(String address) {
+		this.address = address;
+	}
+	public Integer getStatus() {
+		return status;
+	}
+	public void setStatus(Integer status) {
+		this.status = status;
+	}
+	public String getBackgroundImgUrl() {
+		return backgroundImgUrl;
+	}
+	public void setBackgroundImgUrl(String backgroundImgUrl) {
+		this.backgroundImgUrl = backgroundImgUrl;
+	}
+	public Integer getAbbotId() {
+		return abbotId;
+	}
+	public void setAbbotId(Integer abbotId) {
+		this.abbotId = abbotId;
+	}
+	
+	
+	
+}

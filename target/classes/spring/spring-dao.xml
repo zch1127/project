@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+ http://www.springframework.org/schema/beans/spring-beans.xsd
+ http://www.springframework.org/schema/context
+ http://www.springframework.org/schema/context/spring-context-3.1.xsd">
+
+	<!-- 配置整合mybatis过程 -->
+	<!-- 1:配置数据库相关参数properties的属性 -->
+	<!-- <context:property-placeholder location="classpath:jdbc.properties" /> -->
+	<bean id="propertyConfigurer"
+		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="location" value="classpath:jdbc.properties" />
+	</bean>
+	<!-- 2:数据库连接池 -->
+	<bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource" destroy-method="close">
+		<!-- 配置连接池属性 -->
+		<property name="driverClass" value="${driver}"/>
+        <property name="jdbcUrl" value="${url}"/>
+        <property name="user" value="${username}" />
+        <property name="password" value="${password}" />
+        
+		<!-- 初始化连接大小 -->
+		<property name="initialPoolSize" value="0" />
+		<!-- 连接最大数量 -->
+		<property name="maxPoolSize" value="10" />
+		<!-- 连接最小数量 -->
+		<property name="minPoolSize" value="0" />
+		<!-- 连接增涨数量 -->
+		<property name="acquireIncrement" value="5" />
+		<!-- 最大空闲时间 -->
+		<property name="maxIdleTime" value="60" />
+		<!-- 超时时间 -->
+		<property name="checkoutTimeout" value="3000" />
+	</bean>
+	<!-- 3:配置SqlSessionFactory对象 -->
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<!-- 注入数据库连接池 -->
+		<property name="dataSource" ref="dataSource" />
+		<!-- 配置mybatis全局配置文件:mybatis-config.xml -->
+		<property name="configLocation" value="classpath:mybatis-config.xml" />
+		<!-- 扫描sql配置文件:mapper需要的xml文件 -->
+		<property name="mapperLocations" value="classpath:cn.csbe.web.cms.*.mapper.*.xml"></property>
+	</bean>
+	<!-- 4:配置扫描Dao接口包,动态实现Dao接口,注入到spring容器中 -->
+	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+		<!-- 注入sqlSessionFactory -->
+		<property name="sqlSessionFactoryBeanName" value="sqlSessionFactory" />
+		<!-- 给出需要扫描Dao接口包 -->
+		<property name="basePackage" value="cn.csbe.web.cms.*.mapper" />
+	</bean>
+
+	<!-- jdbc Template操作数据库 -->
+	<bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+		<property name="dataSource" ref="dataSource"></property>
+	</bean>
+	
+	<!--*********************** SPRING QUARTZ BEGIN ***********************-->
+	 <!--未付款订单状态的bean -->  
+	<bean id="myJob1" class="cn.csbe.web.cms.util.QuartzJob1" />  
+	<bean id="myJob2" class="cn.csbe.web.cms.util.QuartzJob2" />  
+	<!-- <bean id="myJob3" class="cn.csbe.web.cms.util.QuartzJob3" />   -->
+   	<bean id="myJob4" class="cn.csbe.web.cms.util.QuartzWork" />
+	<!--任务一  -->
+	<bean id="myJobDetail1"  
+		class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">  
+		<property name="targetObject">  
+		    <ref bean="myJob1" />  
+		</property>  
+		<property name="targetMethod">  
+		    <value>work</value>  
+		</property>
+	</bean> 
+	<!--任务二  -->
+	<bean id="myJobDetail2"  
+		class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">  
+		<property name="targetObject">  
+		    <ref bean="myJob2" />  
+		</property>  
+		<property name="targetMethod">  
+		    <value>work</value>  
+		</property>
+	</bean> 
+	<!--任务三  -->  
+	<!-- <bean id="myJobDetail3"  
+		class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">  
+		<property name="targetObject">  
+		    <ref bean="myJob3" />  
+		</property>  
+		<property name="targetMethod">  
+		    <value>work</value>  
+		</property>
+	</bean>  -->
+	<!--任务四  -->
+	<bean id="myJobDetail4"  
+       class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">  
+       <property name="targetObject">  
+           <ref bean="myJob4" />  
+       </property>  
+       <property name="targetMethod">  
+           <value>work</value>  
+       </property>  
+   </bean>
+	<bean id="myJobDetail5"  
+       class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">  
+       <property name="targetObject">  
+           <ref bean="myJob4" />  
+       </property>  
+       <property name="targetMethod">  
+           <value>payWork</value>  
+       </property>  
+   </bean>
+	
+	<!-- 调度的配置开始  -->
+	<!--配置调度，指定调度以及执行时间  -->
+	<!--任务一  -->
+	<bean id="crontestJobTrigger1" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">  
+	    <property name="jobDetail">  
+	    	<ref bean="myJobDetail1" />  
+	    </property>  
+	    <property name="cronExpression">  
+	    <!--  0 */1 * * * ?   每隔一分钟触发一次 --><!--   0 0 12 1/5 * ?	每月的第一个中午开始每隔5天触发一次 -->
+		<!-- <value>0 0 0 * * ?</value>  --><!--  每天零点执行 0 0 0 * * ?   -->
+			<value>0 */5 * * * ?</value> <!--  每隔1分钟触发一次 清理未付款订单 -->
+	    </property>  
+	</bean>  
+	<!--任务二  -->
+	<bean id="crontestJobTrigger2" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">  
+	    <property name="jobDetail">  
+	        <ref bean="myJobDetail2" />  
+	    </property>  
+	    <property name="cronExpression"> 
+			<value>0 0 22 * * ?</value> <!-- 每天22点执行 0 0 0 * * ? -->
+	     </property>  
+	 </bean>
+	<!--任务三  -->
+	<!-- <bean id="crontestJobTrigger3" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">  
+	    <property name="jobDetail">  
+	        <ref bean="myJobDetail3" />  
+	    </property>  
+	    <property name="cronExpression">  
+			<value>0 0 22 * * ?</value> 每天22点执行 0 0 0 * * ?  
+	    </property>  
+	 </bean> -->
+	 <!-- 任务四 -->
+	 <bean id="crontestJobTrigger4" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">  
+       <property name="jobDetail">  
+           <ref bean="myJobDetail4" />  
+       </property>
+       <property name="cronExpression">
+           <value>0 0 8 * * ?</value> <!--系统通知其他   0 0 8 * * ?每天八点-->
+       </property>
+   </bean>  
+   <bean id="crontestJobTrigger5" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">  
+       <property name="jobDetail">  
+           <ref bean="myJobDetail4" />  
+       </property>  
+       <property name="cronExpression">  
+           <value>0 30 9 * * ? </value> <!--系统通知其他   0 0 8 * * * * 每天九点三十-->
+       </property>  
+   </bean>  
+   <bean id="crontestJobTrigger6" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">  
+       <property name="jobDetail">  
+           <ref bean="myJobDetail4" />  
+       </property>  
+       <property name="cronExpression">  
+           <value>0 0 16 * * ? </value> <!--系统通知其他   0 0 8 * * * * 每天十六点-->
+       </property>  
+   </bean>  
+   <bean id="crontestJobTrigger7" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">  
+       <property name="jobDetail">  
+           <ref bean="myJobDetail4" />  
+       </property>  
+       <property name="cronExpression">  
+           <value>0 0 19 * * ? </value> <!--系统通知其他   0 0 8 * * * * 每天十九点-->
+       </property>  
+   </bean>  
+   <bean id="crontestJobTrigger8" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">  
+       <property name="jobDetail">  
+           <ref bean="myJobDetail4" />  
+       </property>  
+       <property name="cronExpression">  
+           <value>0 0 21 * * ?</value> <!--系统通知其他   0 0 8 * * * * 每天二十一点-->
+       </property>  
+   </bean>  
+   <bean id="crontestJobTrigger9" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">  
+       <property name="jobDetail">  
+           <ref bean="myJobDetail5" />  
+       </property>  
+       <property name="cronExpression">  
+           <value>0 30 13 15 * ?</value> <!-- 每月1日上午13:30触发-->
+       </property>  
+   </bean>  
+	<!-- 启动触发器的配置开始   -->
+	<bean name="startQuertz" lazy-init="false" autowire="no"  
+	    class="org.springframework.scheduling.quartz.SchedulerFactoryBean">  
+	    <property name="triggers">  
+	        <list>
+	        <!--触发调度器  -->  
+	            <ref bean="crontestJobTrigger1" />  
+	            <ref bean="crontestJobTrigger2" />  
+	           <!--  <ref bean="crontestJobTrigger3" />   -->
+	            <ref bean="crontestJobTrigger4" />  
+  				<ref bean="crontestJobTrigger5" />  
+  				<ref bean="crontestJobTrigger6" />  
+                <ref bean="crontestJobTrigger7" />  
+  				<ref bean="crontestJobTrigger8" /> 
+  				<ref bean="crontestJobTrigger9" /> 
+	        </list>  
+	    </property>  
+	</bean>
+	<!-- 启动触发器的配置结束 --> 
+
+	
+</beans>

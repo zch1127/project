@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.csbe.web.cms.news.mapper.IPubNewsMapper">
+
+
+	<select id="findById" resultType="cn.csbe.web.cms.news.bean.PubNews"
+		parameterType="java.lang.Integer">
+		select * from pub_news a
+		WHERE a.newsid = #{newsid}
+	</select>
+
+	<select id="findByPage" resultType="cn.csbe.web.cms.news.bean.PubNews"
+		parameterType="cn.csbe.web.cms.news.bean.PubNews">
+		select * from pub_news a
+		<where>
+			<trim prefix="(" suffix=")" prefixOverrides="or">
+
+				<if test="newsTitle != null">
+					or a.newsTitle like CONCAT('%',#{newsTitle},'%' )
+				</if>
+			</trim>
+			and a.status != 0
+		</where>
+		<!-- ORDER BY PinYinInitial -->
+		order by createTime desc
+		LIMIT #{beginIndex},#{rows}
+	</select>
+
+	<select id="findMaxId" resultType="java.lang.Integer">
+		select max(newsid) from
+		pub_news
+	</select>
+
+	<select id="findCount" resultType="java.lang.Long"
+		parameterType="cn.csbe.web.cms.news.bean.PubNews">
+		select count(0) from pub_news a
+		<where>
+			<trim prefix="(" suffix=")" prefixOverrides="or">
+
+				<if test="newsTitle != null">
+					or a.newsTitle like CONCAT('%',#{newsTitle},'%' )
+				</if>
+			</trim>
+			and a.status != 0
+		</where>
+	</select>
+	
+	<!-- 根据新闻状态去查询 byStatus -->
+	<select id="queryByStatus" resultType="cn.csbe.web.cms.news.bean.PubNews">
+		select * from pub_news a where a.status = #{status}
+		<!-- ORDER BY PinYinInitial -->
+		order by publishDate desc
+		LIMIT #{page},#{rows}
+	</select>
+	<!--根据状态去查询  -->
+	<select id="findCountByStatus" resultType="int">
+		select count(1) from pub_news a
+				where a.status = #{status}
+	</select>
+
+	<insert id="insert" parameterType="cn.csbe.web.cms.news.bean.PubNews">
+		insert into pub_news
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="newsTitle != null">
+				newsTitle,
+			</if>
+			<if test="newsIntroduction != null">
+				newsIntroduction,
+			</if>
+			<if test="type != null">
+				type,
+			</if>
+			<if test="htmlUrl != null">
+				htmlUrl,
+			</if>
+			<if test="picture != null">
+				picture,
+			</if>
+			<if test="publishDate != null">
+				publishDate,
+			</if>
+			<if test="endDate != null">
+				endDate,
+			</if>
+			<if test="area != null">
+				area,
+			</if>
+			<if test="address != null">
+				address,
+			</if>
+			<if test="createTime != null">
+				createTime,
+			</if>
+			<if test="status != null">
+				status,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="newsTitle != null">
+				#{newsTitle},
+			</if>
+			<if test="newsIntroduction != null">
+				#{newsIntroduction},
+			</if>
+			<if test="type != null">
+				#{type},
+			</if>
+			<if test="htmlUrl != null">
+				#{htmlUrl},
+			</if>
+			<if test="picture != null">
+				#{picture},
+			</if>
+			<if test="publishDate != null">
+				#{publishDate},
+			</if>
+			<if test="endDate != null">
+				#{endDate},
+			</if>
+			<if test="area != null">
+				#{area},
+			</if>
+			<if test="address != null">
+				#{address},
+			</if>
+			<if test="createTime != null">
+				#{createTime},
+			</if>
+			<if test="status != null">
+				#{status},
+			</if>
+		</trim>
+	</insert>
+
+	<update id="update" parameterType="cn.csbe.web.cms.news.bean.PubNews">
+		update pub_news
+		<set>
+			<if test="newsTitle != null">
+				newsTitle = #{newsTitle},
+			</if>
+			<if test="newsIntroduction != null">
+				newsIntroduction = #{newsIntroduction},
+			</if>
+			<if test="type != null">
+				type = #{type},
+			</if>
+			<if test="picture != null">
+				picture = #{picture},
+			</if>
+			<if test="htmlUrl != null || htmlUrl != ''"  >
+				htmlUrl = #{htmlUrl},
+			</if>
+			<if test="status != null">
+				status = #{status},
+			</if>
+			<if test="publishDate != null">
+				publishDate = #{publishDate},
+			</if>
+			<if test="endDate != null">
+				endDate = #{endDate},
+			</if>
+			<if test="createTime != null">
+				createTime = #{createTime},
+			</if>
+			<if test="updateTime != null">
+				updateTime = #{updateTime},
+			</if>
+		</set>
+		where newsid = #{newsid}
+	</update>
+	
+	<select id="queryById" resultType="cn.csbe.web.cms.news.bean.PubNews">
+		select * from pub_news where newsid = #{newsid}
+	</select>
+	<!--修改活动状态  -->
+	<update id="updateNewsStatusByNewsid" parameterType="cn.csbe.web.cms.news.bean.PubNews">
+		update pub_news 
+		<if test="status == 1 ||status == 2">
+			set status = 3
+		</if>
+		<if test="status == 3  ">
+			set status = 2
+		</if>
+		where newsid = #{newsid}
+	</update>
+</mapper>

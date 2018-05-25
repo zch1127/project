@@ -1,0 +1,9 @@
+package cn.csbe.web.cms.push.service;
+
+import cn.csbe.web.cms.push.bean.UserNotice;
+
+public interface UserNoticeService {
+
+	boolean addUserAndNoticeRelation(UserNotice user);
+	
+}

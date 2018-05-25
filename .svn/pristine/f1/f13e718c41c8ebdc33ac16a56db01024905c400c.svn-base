@@ -1,0 +1,196 @@
+<%@ page language="java" import="java.util.*" pageEncoding="utf-8"%>
+<%
+	String path = request.getContextPath();
+	String basePath = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort()
+			+ path + "/";
+%>
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+
+<title>推送管理</title>
+
+<script type="text/javascript" src="<%=basePath%>js/common/constants.js"></script>
+
+<link rel="stylesheet" type="text/css"
+	href="<%=basePath%>easyui/css/themes/default/easyui.css" />
+<link rel="stylesheet" type="text/css"
+	href="<%=basePath%>easyui/css/themes/icon.css" />
+<script type="text/javascript"
+	src="<%=basePath%>easyui/js/jquery.min.js"></script>
+<script type="text/javascript"
+	src="<%=basePath%>easyui/js/jquery.easyui.min.js"></script>
+<script type="text/javascript"
+	src="<%=basePath%>easyui/js/easyui-lang-zh_CN.js"></script>
+
+<script type="text/javascript" src="<%=basePath%>ueditor/ueditor.config.js"></script>
+<script type="text/javascript" src="<%=basePath%>ueditor/ueditor.all.js"></script>
+<link rel="stylesheet" type="text/css" href="<%=basePath%>ueditor/themes/iframe.css"/> 
+
+<script type="text/javascript" src="<%=basePath%>js/common/common.js"></script>
+<script type="text/javascript">
+$(function() {
+	$("#btnAdd").click(function() {
+		$("#iframe").attr('src', 'toAddNotice');
+		$("#win").window({
+			maximized : true
+		});
+		$("#win").window('open');
+	});
+	// 删除
+	$("#btnUnRec").click(function() {
+		var allSelected = $("#list").datagrid("getSelections");
+		if(allSelected.length == 0){
+			$.messager.alert("删除确认","请选择要删除的数据","warning");			
+		}else{
+			$.messager.confirm("确认删除","确认要删除选中的数据吗",function(r){
+				if(r){
+					var ids= new Array(allSelected.length); 
+					/*把选中的id都给赋值给这个数组  得到所有选中的id  */
+					for(var i =0;i<allSelected.length;i++){
+						ids[i] = allSelected[i].noticeId;
+					}
+					$.ajax({
+						url:"${pageContext.request.contextPath}/push/deleteNotice",
+						data:"noticeId="+ids,
+						dataType:"JSON",
+						success:function(data){
+							if(data){
+								alert("操作成功！！！");
+								$("#list").datagrid("reload"); 
+							}else{
+								alert("删除失败！！！");
+								$("#list").datagrid("reload"); 
+							}
+						}
+					});	
+				}
+			});
+		}		
+	});
+
+	var sortName = 'publishDate';
+	var sortOrder = 'asc';
+
+	var index;
+	$("#list").datagrid(
+					{
+						url:"${pageContext.request.contextPath}/push/showAllPush",
+						method:"POST",
+						pagePosition : 'bottom',
+						singleSelect : false,
+						pagination:true,
+					    pageNumber:1,
+					    pageSize:10,
+					    pageList:[10,20],
+						columns : [[
+								{
+									field : 'ck',
+									checkbox : true,
+									width : '30'
+								},{
+									field : 'noticeId',
+									title : '推送活动主键',
+									width : 70,
+									hidden:true,
+									sortable : true
+								},{
+									field : 'title',
+									title : '活动标题',
+									width : 200,
+									sortable : true
+								},{
+									field : 'introduction',
+									title : '主题简介',
+									width : 300,
+									sortable : true
+								},{
+									field : 'twoType',
+									title : '活动类型',
+									width : 100,
+									sortable : true,
+									formatter : function(value, row, index) {
+										if (value == 1) {
+											return '固定通知';
+										} else if (value == 2) {
+											return '活动通知';
+										} else if(value == 3){
+											return '付费通知';
+										}
+									}
+								},{
+									field : 'createDate',
+									title : '开始日期',
+									sortable : true,
+									width : 200,
+									formatter : function(value){
+				                       var date = new Date(value);
+									    var y = date.getFullYear().toString();
+									    var m = (date.getMonth() + 1);
+									    var d = date.getDate().toString();
+									  	var h = date.getHours().toString();
+									    var i = date.getMinutes().toString();
+									    var s = date.getSeconds().toString();
+									    //
+									    return y + '-' + (m < 10 ? '0' + m : m) + '-' + (d < 10 ? '0' + d : d)+ ' ' + (h < 10 ? '0' + h : h) + ':' + (i < 10 ? '0' + i : i)+ ':' + (s < 10 ? '0' + s : s) ;
+				                    }
+								},{
+										field : 'htmlUrl',
+										title : 'HTML链接',
+										width : 300,
+										sortable : true
+								} ]],
+						//双击事件
+						onDblClickRow : function(index, row) {
+							$("#iframe").attr('src',
+									'toEditPush?noticeId=' + row.noticeId);
+							$("#win").window({
+								maximized : true
+							});
+							$("#win").window('open');
+						}
+					});
+});
+function addNotice(){
+	$("#newForm").dialog({
+			closed:true
+	});
+	$("#newForm").form("submit",{
+	
+		url:"${pageContext.request.contextPath}/push/addPush",
+		dataType:"json",
+		sunccess:function(data){
+			if(data){
+				alert("添加数据成功");
+			};
+			$("#newForm").form("reset");
+			$("#list").datagrid("reload");
+		
+		}
+	})
+
+}
+</script>
+</head>
+
+<body class="easyui-layout">
+
+	<div region="center" title="推送管理">
+		<div class="menus">
+			<a href="javascript:void(0)" id="btnAdd" class="easyui-linkbutton"
+				iconCls="icon-add" plain="true">新增</a> <a href="javascript:void(0)"
+				id="btnUnRec" class="easyui-linkbutton" iconCls="icon-no"
+				plain="true">删除</a>
+		</div>
+		<div id="list"></div>
+	</div>
+	<div id="win"
+		style="padding: 5px; width: 750px; height: 350px; overflow: hidden"
+		class="easyui-window" closed="true" modal="true" maximized='false'>
+		<iframe name="iframe" id="iframe" scrolling="yes" frameborder="0"
+			style="width: 100%; height: 100%;"></iframe>
+	</div>
+	
+</body>
+</html>

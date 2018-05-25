@@ -1,0 +1,89 @@
+package cn.csbe.web.cms.activityalert.bean;
+
+import java.io.Serializable;
+
+import cn.csbe.web.cms.common.bean.Page;
+/**
+ * 活动弹窗表
+ * Title: ActivityAlert  
+ * @author sxzhang 
+ * @date 上午10:22:47
+ */
+public class ActivityAlert extends Page implements Serializable{
+	private Integer alertId;
+	private Integer status;
+	private String name;
+	private String beginTime;
+	private String endTime;
+	private String detailsUrl;
+	private String createTime;
+	private String imgUrl;
+	public Integer getAlertId() {
+		return alertId;
+	}
+	public void setAlertId(Integer alertId) {
+		this.alertId = alertId;
+	}
+	public Integer getStatus() {
+		return status;
+	}
+	public void setStatus(Integer status) {
+		this.status = status;
+	}
+	public String getName() {
+		return name;
+	}
+	public void setName(String name) {
+		this.name = name;
+	}
+	public String getBeginTime() {
+		return beginTime;
+	}
+	public void setBeginTime(String beginTime) {
+		this.beginTime = beginTime;
+	}
+	public String getEndTime() {
+		return endTime;
+	}
+	public void setEndTime(String endTime) {
+		this.endTime = endTime;
+	}
+	public String getDetailsUrl() {
+		return detailsUrl;
+	}
+	public void setDetailsUrl(String detailsUrl) {
+		this.detailsUrl = detailsUrl;
+	}
+	public String getCreateTime() {
+		return createTime;
+	}
+	public void setCreateTime(String createTime) {
+		this.createTime = createTime;
+	}
+	public String getImgUrl() {
+		return imgUrl;
+	}
+	public void setImgUrl(String imgUrl) {
+		this.imgUrl = imgUrl;
+	}
+	public ActivityAlert(Integer alertId, Integer status, String name,
+			String beginTime, String endTime, String detailsUrl,
+			String createTime, String imgUrl) {
+		super();
+		this.alertId = alertId;
+		this.status = status;
+		this.name = name;
+		this.beginTime = beginTime;
+		this.endTime = endTime;
+		this.detailsUrl = detailsUrl;
+		this.createTime = createTime;
+		this.imgUrl = imgUrl;
+	}
+	public ActivityAlert() {
+		super();
+		// TODO Auto-generated constructor stub
+	}
+	
+	
+	
+}

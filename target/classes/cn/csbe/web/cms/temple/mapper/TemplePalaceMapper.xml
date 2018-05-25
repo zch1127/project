@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.csbe.web.cms.temple.mapper.TemplePalaceMapper">
+	
+ 	<!--查询宫殿信息  -->
+ 	<select id="selectAllPalace" resultType="cn.csbe.web.cms.temple.bean.TemplePalace">
+ 		select * from pub_temple_palace where status = 1
+ 			LIMIT #{page},#{rows}
+ 	</select>
+ 	
+ 	<select id="queryPalaceByPid" resultType="cn.csbe.web.cms.temple.bean.TemplePalace">
+ 		select * from pub_temple_palace 
+ 			where palaceId = #{palaceId}
+ 	</select>
+ 	
+ 	<select id="queryCount" resultType="int">
+ 		select count(1) from pub_temple_palace where status = 1
+ 	</select>
+ 	
+ 	<insert id="addTemplePalace">
+ 		insert into pub_temple_palace 
+ 		<trim prefix="(" suffix=")" suffixOverrides=",">
+ 			<if test="templeId !=null">
+ 				templeId,
+ 			</if>
+ 			<if test="palaceName !=null">
+ 				palaceName,
+ 			</if>
+ 			<if test="imgUrl !=null">
+ 				imgUrl,
+ 			</if>
+ 			<if test="backgroundImgUrl !=null">
+ 				backgroundImgUrl,
+ 			</if>
+ 			<if test="content !=null">
+ 				content,
+ 			</if>
+ 		</trim>
+ 		<trim prefix="values(" suffix=")" suffixOverrides=",">
+ 			<if test="templeId !=null">
+ 				#{templeId},
+ 			</if>
+ 			<if test="palaceName !=null">
+ 				#{palaceName},
+ 			</if>
+ 			<if test="imgUrl !=null">
+ 				#{imgUrl},
+ 			</if>
+ 			<if test="backgroundImgUrl !=null">
+ 				#{backgroundImgUrl},
+ 			</if>
+ 			<if test="content !=null">
+ 				#{content},
+ 			</if>
+ 		</trim>
+ 	</insert>
+ 	<!--伪删除  -->
+ 	<update id="deletePalace">
+ 		update pub_temple_palace set status = 0 where palaceId in 
+		<foreach collection="array" item="idsll" open="(" close=")" 
+		separator=",">#{idsll}</foreach>
+ 	</update>
+ 	
+ 	<update id="updateTemplePalace">
+ 		update pub_temple_palace set
+ 			<if test="templeId !=null">
+ 				templeId=#{templeId} ,
+ 			</if>
+ 			<if test="palaceName !=null">
+ 				palaceName=#{palaceName},
+ 			</if>
+ 			<if test="imgUrl !=null">
+ 				imgUrl=#{imgUrl},
+ 			</if>
+ 			<if test="backgroundImgUrl !=null">
+ 				backgroundImgUrl=#{backgroundImgUrl},
+ 			</if>
+ 			<if test="content !=null">
+ 				content=#{content}
+ 			</if>
+ 			<if test="status !=null">
+ 				status=#{status}
+ 			</if>
+ 		where palaceId = #{palaceId}
+ 	</update>
+ 	
+</mapper>

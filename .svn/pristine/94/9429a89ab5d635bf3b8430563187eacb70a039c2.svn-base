@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.csbe.web.cms.order.mapper.CommentMapper">
+	
+	<!--查询所有评价表  -->
+	<select id="selectAllComment" resultType="cn.csbe.web.cms.order.bean.OrderComment">
+		select a.id,a.commentContent,a.sellerReplyContent,a.userId,a.productId,a.commentImgJson,a.createDate,a.status,
+		c.userName from ds_order_comment a LEFT JOIN 
+		pub_user c on a.userId = c.userId limit #{page},#{rows}
+	</select>
+	<!--查询数量  -->
+	<select id="selectCount" resultType="int">
+		select count(*) from ds_order_comment
+	</select>
+	<!--根据id删除  -->
+	<delete id="deleteById">
+		delete from ds_order_comment where id = #{id}
+	</delete>
+	<!--批量删除  -->
+	<delete id="deleteManyComment">
+		delete from ds_order_comment where id in
+		<foreach collection="array" item="idss" open="(" close=")" separator=",">#{idss}</foreach>
+	</delete>
+	<!--查询ById  -->
+	<select id="selectCommentById" resultType="cn.csbe.web.cms.order.bean.OrderComment">
+		select a.id,a.commentContent,a.sellerReplyContent,a.userId,a.productId,a.commentImgJson,a.createDate,a.status,
+		c.userName from ds_order_comment a LEFT JOIN 
+		pub_user c on a.userId = c.userId where id =#{id}
+	</select>
+	<!--回复评论  -->
+	<update id="updateComment">
+		update ds_order_comment set sellerReplyContent =#{reply},modifyDate = sysDate() where id=#{id}
+	</update>
+	<!-- 自动好评 -->
+	<insert id="addComment">
+		insert into ds_order_comment(commentContent,userId,orderDetailsId,productId,createDate,status)
+		values(#{commentContent},#{userId},#{orderDetailsId},#{productId},sysDate(),1)
+	</insert>
+	
+	
+	
+</mapper>

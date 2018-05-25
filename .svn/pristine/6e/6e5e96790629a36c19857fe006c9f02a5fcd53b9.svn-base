@@ -1,0 +1,276 @@
+package cn.csbe.web.cms.news.controller;
+
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.lang.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.commons.CommonsMultipartFile;
+import org.springframework.web.servlet.ModelAndView;
+
+import cn.csbe.web.cms.auth.bean.UserPassword;
+import cn.csbe.web.cms.common.CSBE;
+import cn.csbe.web.cms.common.DateUtils;
+import cn.csbe.web.cms.common.Result;
+import cn.csbe.web.cms.common.ToHtml;
+import cn.csbe.web.cms.common.UploadResult;
+import cn.csbe.web.cms.common.UploadUtils;
+import cn.csbe.web.cms.common.constantUtils;
+import cn.csbe.web.cms.common.bean.Message;
+import cn.csbe.web.cms.common.bean.QueryResult;
+import cn.csbe.web.cms.news.bean.Area;
+import cn.csbe.web.cms.news.bean.PubNews;
+import cn.csbe.web.cms.news.service.IPubNewsService;
+
+/**
+ * Title：PubNewsController
+ * Description：新闻
+ * @author chZhou
+ * @date    2017-7-3
+ */
+@Controller
+@RequestMapping("/news")
+public class PubNewsController {
+
+	@Autowired
+	private IPubNewsService pubNewsService;
+
+	/**
+	 * 跳转到新闻管理页
+	 */
+	@RequestMapping("toNews")
+	private Object toNews() {
+
+		return "/news/news";
+	}
+
+	/** 
+	 * 跳转到添加新闻页
+	 */
+	@RequestMapping("toAddNews")
+	private String addNews() {
+
+		return "/news/addNews";
+	}
+
+	/**
+	 * 跳转到编辑新闻页
+	 */
+	@RequestMapping("toEditNews")
+	private ModelAndView toEditNews(int newsid) throws Exception {
+
+		ModelAndView view = new ModelAndView();
+
+		PubNews pubNews = (PubNews) pubNewsService.findById(newsid);
+		view.addObject("pubNews", pubNews);
+		view.setViewName("news/editNews");
+
+		return view;
+	}
+	/**
+	 * 跳转到上架活动页面
+	 * toShelvesNews
+	 */
+	@RequestMapping("/toShelvesNews")
+	public Object toShelvesNews(){
+		
+		return "/news/shelvesNews";
+	}
+	
+	@RequestMapping("/newInformation")
+	public Object toNewInformation(){
+		return "/news/newInformation";
+	}
+
+	/**
+	 * 获取新闻
+	 */
+	@RequestMapping("getNewsByPage")
+	@ResponseBody
+	private Map<String, Object> getNewsByPage(HttpServletRequest request, HttpServletResponse response, PubNews news)
+			throws Exception {
+		Map<String, Object> map = new HashMap<String, Object>();
+		QueryResult queryResult = this.pubNewsService.findByPage(news);
+		List rows = queryResult.getList();
+		long total = queryResult.getTotalSize();
+		map.put("rows", rows);
+		map.put("total", total);
+		
+		return map;
+
+	}
+	
+	/**
+	 * 添加新闻
+	 */
+	@RequestMapping("addNews")
+	@ResponseBody
+	private Object addNews(PubNews news) throws Exception {
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd ");  
+		Date date = sdf.parse(news.getPublishDate());
+		String time=DateUtils.getDateTimeStr(date, "yyyy-MM-dd");
+		if(!StringUtils.isEmpty(news.getHtmlUrl())){
+			String content=news.getHtmlUrl();
+			if(content.contains(CSBE.addlocalStr)){
+				content=content.replaceAll(CSBE.addlocalStr,CSBE.imgHtmlPath);
+			}
+			
+			int rand=CSBE.getRandomNum();
+			//将html内容生成html页面，将链接存储到数据库中
+			ToHtml.service("model", "/model/news/",rand,news.getNewsTitle(),time,news.getPreviewTotal(),content);
+			news.setHtmlUrl(CSBE.htmlPath+"model/news/"+rand+".html");
+	   }
+		news.setCreateTime(DateUtils.getDateTimeStr(new Date()));
+		news.setStatus(1);
+		boolean m = this.pubNewsService.insert(news);
+		System.out.println(news.getStatus());
+		return m ? new Message(true, "操作成功") : new Message(false, "操作失败");
+	}
+
+	/**
+	 * 更新新闻
+	 */
+	@RequestMapping("editNews")
+	@ResponseBody
+	private Object editNews(PubNews news) throws Exception {
+		int rand;
+		Date date;
+		String time;
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		PubNews pn =pubNewsService.queryById(news.getNewsid());
+		if(news.getPublishDate() ==null){//开始时间为空
+			date = sdf.parse(pn.getPublishDate());
+		}else{
+			date = sdf.parse(news.getPublishDate());
+		}
+		time=DateUtils.getDateTimeStr(date, "yyyy-MM-dd");
+		if(!StringUtils.isEmpty(news.getHtmlUrl())){
+			String content=news.getHtmlUrl();
+			if(content.contains(CSBE.localStr)){
+				content=content.replaceAll(CSBE.localStr,CSBE.htmlPath);
+			}
+			//查询原来htmlUrl
+			if(StringUtils.isEmpty(news.getParam())){
+				rand=CSBE.getRandomNum();
+			}else{
+				 String param=news.getParam();
+				 rand=Integer.parseInt(param.substring(param.length()-11, param.length()-5));
+			}
+			
+			//将html内容生成html页面，将链接存储到数据库中
+			ToHtml.service("model", "/model/news/",rand,news.getNewsTitle(),time,news.getPreviewTotal(),content);
+			news.setHtmlUrl(CSBE.htmlPath+"model/news/"+rand+".html");
+	   }else{
+		   news.setHtmlUrl(pn.getHtmlUrl());
+	   }
+		if(news.getStatus()==null){
+			news.setStatus(pn.getStatus());
+		}
+		news.setCreateTime(DateUtils.getDateTimeStr(date, "yyyy-MM-dd HH:mm:ss"));
+		news.setUpdateTime(sdf.format(new Date()));
+		boolean m = this.pubNewsService.update(news);
+		return m ? new Message(true, "操作成功") : new Message(false, "操作失败");
+	}
+
+	/**
+	 * 逻辑删除新闻
+	 */
+	@RequestMapping("delNews")
+	@ResponseBody
+	private Object delNews(String newsid) throws Exception {
+		boolean flag = false;
+		PubNews news = new PubNews();
+		if (newsid.contains(",")) {
+			String[] arr = newsid.split(",");
+			for (String string : arr) {
+				news.setNewsid(Integer.valueOf(string));
+				news.setStatus(0);
+				flag = this.pubNewsService.update(news);
+			}
+		} else {
+			news.setNewsid(Integer.valueOf(newsid));
+			news.setStatus(0);
+			flag = this.pubNewsService.update(news);
+		}
+
+		return flag ? new Message(true, "操作成功") : new Message(false, "操作失败");
+	}
+	
+	/**
+	 * 获取新闻根据状态
+	 */
+	@RequestMapping("getNewsByPageAndStatus")
+	@ResponseBody
+	private Map<String, Object> getNewsByPageAndStatus(Integer page,Integer rows,Integer status)
+			throws Exception {
+		Map<String, Object> map = new HashMap<String, Object>();
+		System.out.println(status);
+		map = pubNewsService.queryByStatus(status,page,rows);
+		return map;
+
+	}
+	
+	/**
+	 * 批量修改新闻活动状态
+	 */
+	@RequestMapping("updateNewsStatusByNewsid")
+	@ResponseBody
+	private Object updateNewsStatusByNewsid(String newsid,Integer status) throws Exception {
+		boolean flag = false;
+		PubNews news = new PubNews();
+		news.setStatus(status);//接收新闻状态
+		if (newsid.contains(",")) {
+			String[] arr = newsid.split(",");
+			for (String string : arr) {
+				news.setNewsid(Integer.valueOf(string));
+				flag = this.pubNewsService.updateNewsStatusByNewsid(news);
+			}
+		} else {
+			news.setNewsid(Integer.valueOf(newsid));
+			flag = this.pubNewsService.updateNewsStatusByNewsid(news);
+		}
+		return flag ? new Message(true, "操作成功") : new Message(false, "操作失败");
+	}
+	
+	
+	/**
+	 * 新闻图片上传
+	 */
+	@RequestMapping(value = "upload/pictrue", method = RequestMethod.POST)
+	@ResponseBody
+	private Object uploadfile(@RequestParam("upfile") CommonsMultipartFile mFile, HttpServletRequest request,
+			HttpServletResponse response, UserPassword userPassword) throws Exception {
+
+		UploadResult uploadResult = UploadUtils.upload(request, mFile, constantUtils.NEWS_IMG);
+
+		if (uploadResult == null || uploadResult.getStatus() != CSBE.OK) {
+			return new Message(false, "不合法的文件类型");
+		}
+
+		return CSBE.encryption(new Result(CSBE.OK, "上传成功", uploadResult.getValue()));
+
+	}
+	/**
+	 * 查询地址
+	 */
+	@RequestMapping("/selectArea")
+	@ResponseBody
+	public List<Area> selectArea(){
+		List<Area> list = new ArrayList<Area>();
+		list = this.pubNewsService.selectArea();
+		return list;
+	}
+
+}
